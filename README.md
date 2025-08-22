@@ -1,70 +1,95 @@
-# Getting Started with Create React App
+# nieuwnet - Webagency Website
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Een moderne, responsive one-page website voor de webagency "nieuwnet", gebouwd met React.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **Moderne Design**: Clean en professioneel design met gradient achtergronden
+- **Responsive**: Volledig responsive voor alle apparaten
+- **Smooth Scrolling**: Vloeiende navigatie tussen secties
+- **Interactive Elements**: Hover effecten en animaties
+- **SEO Optimized**: Meta tags en Open Graph voor betere vindbaarheid
 
-### `npm start`
+## 📱 Secties
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. **Hero Section** - Welkomstbericht met call-to-action knoppen
+2. **Over Ons** - Informatie over het bedrijf en statistieken
+3. **Diensten** - Overzicht van aangeboden diensten
+4. **Portfolio** - Showcase van projecten
+5. **Contact** - Contactformulier en bedrijfsinformatie
+6. **Footer** - Links en extra informatie
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠️ Technologieën
 
-### `npm test`
+- React 19
+- CSS3 met Grid en Flexbox
+- Responsive design
+- Smooth scrolling navigatie
+- CSS animaties en transities
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚀 Installatie en Uitvoering
 
-### `npm run build`
+1. Clone de repository
+```bash
+git clone [repository-url]
+cd nieuwnet
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. Installeer dependencies
+```bash
+npm install
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. Start de development server
+```bash
+npm start
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+4. Open [http://localhost:3000](http://localhost:3000) in je browser
 
-### `npm run eject`
+## 📦 Build voor Productie
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+npm run build
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🎨 Aanpassingen
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Kleuren
+- Primaire kleur: `#2563eb` (blauw)
+- Accent kleur: `#fbbf24` (geel)
+- Achtergrond: `#f9fafb` (licht grijs)
+- Tekst: `#1f2937` (donker grijs)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Fonts
+- Hoofdfont: Inter (Google Fonts)
+- Fallback: System fonts
 
-## Learn More
+## 📱 Responsive Breakpoints
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **Desktop**: 1200px+
+- **Tablet**: 768px - 1199px
+- **Mobile**: 480px - 767px
+- **Small Mobile**: < 480px
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🔧 Customization
 
-### Code Splitting
+### Bedrijfsinformatie Aanpassen
+Bewerk de volgende bestanden om bedrijfsinformatie aan te passen:
+- `src/App.js` - Hoofdinhoud en teksten
+- `public/index.html` - Meta informatie en titel
+- `public/manifest.json` - App manifest
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Styling Aanpassen
+Alle styling staat in `src/App.css` en kan eenvoudig aangepast worden.
 
-### Analyzing the Bundle Size
+## 📄 Licentie
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Dit project is gemaakt voor nieuwnet webagency.
 
-### Making a Progressive Web App
+## 🤝 Contact
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Voor vragen of ondersteuning, neem contact op via:
+- Email: info@nieuwnet.nl
+- Telefoon: +31 6 12345678
+- Locatie: Amsterdam, Nederland
