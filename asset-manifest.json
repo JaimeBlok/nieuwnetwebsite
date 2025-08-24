@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/nieuwnetwebsite/static/css/main.c119d799.css",
+    "main.js": "/nieuwnetwebsite/static/js/main.6208f8cc.js",
+    "index.html": "/nieuwnetwebsite/index.html",
+    "main.c119d799.css.map": "/nieuwnetwebsite/static/css/main.c119d799.css.map",
+    "main.6208f8cc.js.map": "/nieuwnetwebsite/static/js/main.6208f8cc.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c119d799.css",
+    "static/js/main.6208f8cc.js"
+  ]
+}
