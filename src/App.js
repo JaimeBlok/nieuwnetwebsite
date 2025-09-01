@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Import alle afbeeldingen
 import logoImage from './images/NNLOGO.png';
@@ -17,20 +18,34 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isContactFormOpen, setIsContactFormOpen] = useState(false);
   const [isContactButtonExpanded, setIsContactButtonExpanded] = useState(false);
-  const [currentSection, setCurrentSection] = useState(null);
+  const [currentSection, setCurrentSection] = useState('over-ons');
   const [scrollY, setScrollY] = useState(0);
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const [contactFormData, setContactFormData] = useState({
     name: '',
     email: '',
     phone: '',
     company: '',
+    subject: '',
     message: ''
   });
   const [formErrors, setFormErrors] = useState({});
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [selectedConversation, setSelectedConversation] = useState(false);
+  const [includeBTW, setIncludeBTW] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
 
   const fullText = '<Welkom!\nJouw website,\nonze expertise>';
+  
+  // Inlaad animatie effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100); // Korte delay voor smooth animatie
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   useEffect(() => {
     let index = 0;
@@ -89,8 +104,10 @@ function App() {
     };
   }, [isMenuOpen]);
 
-  // Effect voor scroll tracking - robuuste detectie
+  // Effect voor scroll tracking - geoptimaliseerde detectie
   useEffect(() => {
+    let ticking = false;
+    
     const updateSection = () => {
       const scroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
       
@@ -98,80 +115,39 @@ function App() {
       if (scroll < 600) {
         setCurrentSection(null);
       } else if (scroll < 1200) {
+        setCurrentSection('over-ons');
+  
+      } else if (scroll < 1600) {
         setCurrentSection('portfolio');
-      } else if (scroll < 1800) {
-        setCurrentSection('team');  
       } else if (scroll < 2400) {
         setCurrentSection('diensten');
       } else {
         setCurrentSection('contact');
       }
+      
+      ticking = false;
     };
 
-    // Robuuste scroll detectie met meerdere methodes
-    window.addEventListener('scroll', updateSection, { passive: true });
-    document.addEventListener('scroll', updateSection, { passive: true });
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateSection);
+        ticking = true;
+      }
+    };
+
+    // Gebruik alleen window scroll event met throttling
+    window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', updateSection);
-    
-    // Timer backup voor constante monitoring
-    const interval = setInterval(updateSection, 200);
     
     updateSection(); // Initial call
     
     return () => {
-      window.removeEventListener('scroll', updateSection);
-      document.removeEventListener('scroll', updateSection);
+      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', updateSection);
-      clearInterval(interval);
     };
   }, []);
 
-  // Effect voor sliding indicator
-  useEffect(() => {
-    const updateIndicator = () => {
-      const navContainer = document.querySelector('.desktop-menu');
-      if (!navContainer) return;
 
-      let targetElement = null;
-      const sections = ['portfolio', 'team', 'diensten', 'contact'];
-      
-      if (currentSection && sections.includes(currentSection)) {
-        // Zoek het actieve element
-        const links = navContainer.querySelectorAll('a');
-        
-        links.forEach((link) => {
-          const href = link.getAttribute('href');
-          if (href === `#${currentSection}`) {
-            targetElement = link;
-          }
-        });
-      }
-
-      if (targetElement) {
-        const containerRect = navContainer.getBoundingClientRect();
-        const targetRect = targetElement.getBoundingClientRect();
-        
-        setIndicatorStyle({
-          left: targetRect.left - containerRect.left,
-          width: targetRect.width,
-          opacity: 1
-        });
-      } else {
-        setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
-      }
-    };
-
-    // Delay om ervoor te zorgen dat DOM elementen geladen zijn
-    const timeout = setTimeout(updateIndicator, 50);
-    
-    // Update bij window resize
-    window.addEventListener('resize', updateIndicator);
-    
-    return () => {
-      clearTimeout(timeout);
-      window.removeEventListener('resize', updateIndicator);
-    };
-  }, [currentSection]);
 
   // Functie om sectienaam te vertalen
   const getSectionName = (sectionId) => {
@@ -179,12 +155,104 @@ function App() {
     
     const sectionNames = {
       'home': 'Home',
+      'over-ons': 'Over ons',
       'portfolio': 'Portfolio',
-      'team': 'Over ons',
+
       'diensten': 'Diensten',
       'contact': 'Contact'
     };
     return sectionNames[sectionId] || 'Home';
+  };
+
+  // Functie om pakket te selecteren en direct naar contact te gaan
+  const selectPackage = (packageInfo) => {
+    setSelectedPackage(packageInfo);
+    
+    // Zet het onderwerp in het subject veld
+    const packageSubject = `Aanvraag ${packageInfo.name}`;
+
+    setContactFormData(prev => ({
+      ...prev,
+      subject: packageSubject
+    }));
+    
+    // Scroll naar contact sectie
+    const contactSection = document.querySelector('#contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Functie om contactformulier te verwerken
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validatie
+    const errors = {};
+    if (!contactFormData.name.trim()) errors.name = 'Naam is verplicht';
+    if (!contactFormData.email.trim()) errors.email = 'Email is verplicht';
+    if (!contactFormData.subject.trim()) errors.subject = 'Onderwerp is verplicht';
+    if (!contactFormData.message.trim()) errors.message = 'Bericht is verplicht';
+    
+    setFormErrors(errors);
+    
+    if (Object.keys(errors).length === 0) {
+      try {
+        console.log('Versturen naar Vercel API...');
+        
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            name: contactFormData.name,
+            email: contactFormData.email,
+            phone: contactFormData.phone || '',
+            company: contactFormData.company || '',
+            subject: contactFormData.subject,
+            message: contactFormData.message
+          })
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('Niet-JSON response:', text);
+          throw new Error('Server stuurt geen JSON terug. Mogelijk PHP error.');
+        }
+
+        const result = await response.json();
+        console.log('Server response:', result);
+        
+        if (result.status === 'success') {
+          setIsFormSubmitted(true);
+          
+          // Reset form
+          setContactFormData({
+            name: '',
+            email: '',
+            phone: '',
+            company: '',
+            subject: '',
+            message: ''
+          });
+          setSelectedPackage(null);
+        } else {
+          alert('Server fout: ' + (result.message || result.errors?.join(', ') || 'Onbekende fout'));
+        }
+      } catch (error) {
+        console.error('Verzending mislukt:', error);
+        alert(`Kan email niet verzenden: ${error.message}\n\nControleer of verzend.php correct geïnstalleerd is op de server.`);
+      }
+    }
   };
 
   console.log('App component loaded');
@@ -203,12 +271,15 @@ function App() {
         margin: 0,
         padding: '0 0 40px 0',
         overflow: 'visible',
-        position: 'relative'
+        position: 'relative',
+        opacity: isLoaded ? 1 : 0,
+        transform: isLoaded ? 'translateY(0)' : 'translateY(20px)',
+        transition: 'opacity 0.8s ease, transform 0.8s ease'
       }}
     >
       
       <header className="header" style={{ 
-        padding: '0 clamp(40px, 8vw, 80px)', 
+        padding: '0', 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
@@ -219,16 +290,20 @@ function App() {
         left: 0,
         zIndex: 1000,
         backgroundColor: '#ffffff',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
+        borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+        overflow: 'visible'
       }}>
-        {/* Logo aan de linkerkant */}
-        <a href="/" style={{ textDecoration: 'none' }}>
+        {/* Logo aan de linkerkant - uitgelijnd met content */}
+        <a href="/" style={{
+          textDecoration: 'none',
+          marginLeft: 'clamp(20px, 4vw, 40px)'
+        }}>
         <img 
           src={logoImage} 
           alt="NieuwNet Logo" 
           className="logo"
           style={{ 
-              height: 'clamp(32px, 5vw, 42px)', 
+              height: 'clamp(24px, 3.5vw, 32px)', 
             width: 'auto',
               flexShrink: '0',
               padding: '0',
@@ -251,36 +326,26 @@ function App() {
         {/* Desktop menu - rechts uitgelijnd */}
         <div className="desktop-menu" style={{
           display: 'flex',
-          gap: 'clamp(1px, 0.2vw, 3px)',
+          gap: 'clamp(4px, 1vw, 12px)',
           alignItems:'center',
           zIndex: 1001,
           marginLeft: 'auto',
+          marginRight: 'clamp(20px, 4vw, 40px)',
           paddingRight: 'clamp(8px, 1.5vw, 20px)',
-          position: 'relative'
+          position: 'relative',
+          overflow: 'visible'
         }}>
-          {/* Sliding indicator blokje */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            height: '100%',
-            backgroundColor: 'rgba(0, 102, 204, 0.12)',
-            borderRadius: '20px',
-            transition: 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            left: indicatorStyle.left,
-            width: indicatorStyle.width,
-            opacity: indicatorStyle.opacity,
-            zIndex: -1
-          }} />
+
           <a 
             href="#portfolio" 
             style={{
               textDecoration: 'none',
               color: currentSection === 'portfolio' ? '#0066cc' : '#333333',
               fontSize: 'clamp(14px, 2vw, 16px)',
-              fontWeight: '700',
+              fontWeight: '400',
               fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-              padding: 'clamp(6px, 1vw, 8px) clamp(6px, 1vw, 8px)',
+              padding: 'clamp(4px, 0.8vw, 6px) clamp(8px, 1.2vw, 10px)',
               borderRadius: '20px',
               backgroundColor: 'transparent',
               border: '1px solid transparent',
@@ -292,28 +357,27 @@ function App() {
             onMouseEnter={(e) => {
               if (currentSection !== 'portfolio') {
                 e.target.style.color = '#0066cc';
-                e.target.style.transform = 'translateY(-1px)';
               }
             }}
             onMouseLeave={(e) => {
               if (currentSection !== 'portfolio') {
                 e.target.style.color = '#333333';
-                e.target.style.transform = 'translateY(0)';
               }
             }}
           >
             Portfolio
           </a>
-          <a 
-            href="#team" 
-            style={{
+
+                      <a 
+              href="#over-ons-anchor" 
+              style={{
               textDecoration: 'none',
-              color: currentSection === 'team' ? '#0066cc' : '#333333',
+              color: currentSection === 'over-ons' ? '#0066cc' : '#333333',
               fontSize: 'clamp(14px, 2vw, 16px)',
-              fontWeight: '700',
+              fontWeight: '400',
               fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-              padding: 'clamp(6px, 1vw, 8px) clamp(6px, 1vw, 8px)',
+              padding: 'clamp(4px, 0.8vw, 6px) clamp(8px, 1.2vw, 10px)',
               borderRadius: '20px',
               backgroundColor: 'transparent',
               border: '1px solid transparent',
@@ -323,48 +387,46 @@ function App() {
               boxShadow: '0 0 0 rgba(0, 102, 204, 0)'
             }}
             onMouseEnter={(e) => {
-              if (currentSection !== 'team') {
+              if (currentSection !== 'over-ons') {
                 e.target.style.color = '#0066cc';
-                e.target.style.transform = 'translateY(-1px)';
               }
             }}
             onMouseLeave={(e) => {
-              if (currentSection !== 'team') {
+              if (currentSection !== 'over-ons') {
                 e.target.style.color = '#333333';
-                e.target.style.transform = 'translateY(0)';
               }
             }}
           >
             Over ons
           </a>
+
           <a 
             href="#diensten" 
             style={{
               textDecoration: 'none',
               color: currentSection === 'diensten' ? '#0066cc' : '#333333',
               fontSize: 'clamp(14px, 2vw, 16px)',
-              fontWeight: '700',
+              fontWeight: '400',
               fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-              padding: 'clamp(6px, 1vw, 8px) clamp(6px, 1vw, 8px)',
+              padding: 'clamp(4px, 0.8vw, 6px) clamp(8px, 1.2vw, 10px)',
               borderRadius: '20px',
               backgroundColor: 'transparent',
               border: '1px solid transparent',
               position: 'relative',
               overflow: 'hidden',
+
               transform: 'translateY(0) scale(1)',
               boxShadow: '0 0 0 rgba(0, 102, 204, 0)'
             }}
             onMouseEnter={(e) => {
               if (currentSection !== 'diensten') {
                 e.target.style.color = '#0066cc';
-                e.target.style.transform = 'translateY(-1px)';
               }
             }}
             onMouseLeave={(e) => {
               if (currentSection !== 'diensten') {
                 e.target.style.color = '#333333';
-                e.target.style.transform = 'translateY(0)';
               }
             }}
           >
@@ -376,28 +438,27 @@ function App() {
               textDecoration: 'none',
               color: currentSection === 'contact' ? '#0066cc' : '#333333',
               fontSize: 'clamp(14px, 2vw, 16px)',
-              fontWeight: '700',
+              fontWeight: '400',
               fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-              padding: 'clamp(6px, 1vw, 8px) clamp(6px, 1vw, 8px)',
+              padding: 'clamp(4px, 0.8vw, 6px) clamp(8px, 1.2vw, 10px)',
               borderRadius: '20px',
               backgroundColor: 'transparent',
               border: '1px solid transparent',
               position: 'relative',
               overflow: 'hidden',
+
               transform: 'translateY(0) scale(1)',
               boxShadow: '0 0 0 rgba(0, 102, 204, 0)'
             }}
             onMouseEnter={(e) => {
               if (currentSection !== 'contact') {
                 e.target.style.color = '#0066cc';
-                e.target.style.transform = 'translateY(-1px)';
               }
             }}
             onMouseLeave={(e) => {
               if (currentSection !== 'contact') {
                 e.target.style.color = '#333333';
-                e.target.style.transform = 'translateY(0)';
               }
             }}
           >
@@ -416,10 +477,11 @@ function App() {
             border: 'none',
             cursor: 'pointer',
             padding: 'clamp(6px, 1.5vw, 8px)',
-            borderRadius: '4px',
+            borderRadius: '3px',
             transition: 'all 0.2s ease',
             zIndex: 1001,
             marginLeft: 'auto',
+            marginRight: 'clamp(20px, 4vw, 40px)',
             minWidth: 'clamp(40px, 8vw, 44px)',
             minHeight: 'clamp(40px, 8vw, 44px)',
             alignItems: 'center',
@@ -469,7 +531,7 @@ function App() {
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(0, 0, 0, 0.08)',
-            borderRadius: '20px',
+                                  borderRadius: '20px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
             zIndex: 10001,
             padding: '0',
@@ -492,7 +554,7 @@ function App() {
                 border: 'none',
                 cursor: 'pointer',
                 padding: '10px',
-                borderRadius: '8px',
+                borderRadius: '6px',
                 width: '40px',
                 height: '40px',
                 display: 'flex',
@@ -532,7 +594,7 @@ function App() {
                 textDecoration: 'none',
                 color: '#2a2a2a',
                 fontSize: '16px',
-                fontWeight: '600',
+                fontWeight: '400',
                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 transition: 'all 0.3s ease'
               }}
@@ -562,7 +624,7 @@ function App() {
             </a>
 
             <a 
-              href="#team" 
+              href="#over-ons-anchor" 
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -571,7 +633,7 @@ function App() {
                 textDecoration: 'none',
                 color: '#2a2a2a',
                 fontSize: '16px',
-                fontWeight: '600',
+                fontWeight: '400',
                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 transition: 'all 0.3s ease'
               }}
@@ -609,7 +671,7 @@ function App() {
                 textDecoration: 'none',
                 color: '#2a2a2a',
                 fontSize: '16px',
-                fontWeight: '600',
+                fontWeight: '400',
                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 transition: 'all 0.3s ease'
               }}
@@ -646,7 +708,7 @@ function App() {
                 textDecoration: 'none',
                 color: '#2a2a2a',
                 fontSize: '16px',
-                fontWeight: '600',
+                fontWeight: '400',
                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 transition: 'all 0.3s ease'
               }}
@@ -671,7 +733,7 @@ function App() {
                 color: 'inherit'
               }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 16.92V19.92C22.0011 20.1985 21.9441 20.4742 21.8325 20.7294C21.7209 20.9846 21.5573 21.2136 21.3521 21.4019C21.1469 21.5902 20.9046 21.7335 20.6407 21.8227C20.3768 21.9119 20.0973 21.9454 19.82 21.92C16.7428 21.5856 13.787 20.5341 11.19 18.85C8.77382 17.3146 6.72533 15.2661 5.18999 12.85C3.49997 10.2412 2.44824 7.27099 2.11999 4.18C2.09461 3.90347 2.12787 3.62476 2.21649 3.36162C2.30512 3.09849 2.44756 2.85685 2.63483 2.65215C2.8221 2.44745 3.04976 2.28341 3.30351 2.17179C3.55726 2.06018 3.8317 2.00333 4.10999 2.00001H7.10999C7.59522 1.99522 8.06579 2.16708 8.43373 2.48353C8.80167 2.79999 9.04201 3.23945 9.10999 3.72001C9.23662 4.68007 9.47144 5.62273 9.80999 6.53001C9.94454 6.88792 9.97351 7.27675 9.89382 7.65319C9.81413 8.02963 9.62884 8.37496 9.35999 8.65001L8.08999 9.92001C9.51367 12.4135 11.5865 14.4863 14.08 15.91L15.35 14.64C15.625 14.3712 15.9704 14.1859 16.3468 14.1062C16.7232 14.0265 17.1121 14.0555 17.47 14.19C18.3773 14.5286 19.3199 14.7634 20.28 14.89C20.7658 14.9585 21.2094 15.2032 21.5265 15.5765C21.8437 15.9498 22.0122 16.4268 22 16.92Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M22 16.92V19.92C22.0011 20.1985 21.9441 20.4742 21.8325 20.7294C21.7209 20.9846 21.5573 21.2136 21.3521 21.4019C21.1469 21.5902 20.9046 21.7335 20.6407 21.8227C20.3768 21.9119 20.0973 21.9454 19.82 21.92C16.7428 21.5856 13.787 20.5341 11.19 18.85C8.77382 17.3146 6.72533 15.2661 5.18999 12.85C3.49997 10.2412 2.44824 7.27099 2.11999 4.18C2.09461 3.90347 2.12787 3.62476 2.21649 3.36162C2.30512 3.09849 2.44756 2.85685 2.63483 2.65215C2.8221 2.44745 3.04976 2.28341 3.30351 2.17179C3.55726 2.06018 3.8317 2.00333 4.10999 2.00001H7.10999C7.59522 1.99522 8.06579 2.16708 8.43373 2.48353C8.80167 2.79999 9.04201 3.23945 9.10999 3.72001C9.23662 4.68007 9.47144 5.62273 9.80999 6.53001C9.94454 6.88792 9.97351 7.27675 9.89382 7.65319C9.81413 8.02963 9.62884 8.37496 9.35999 8.65001L8.08999 9.92001C9.51367 12.4135 11.5865 14.4863 14.08 15.91L15.35 14.64C15.625 14.3712 15.9704 14.1859 16.3468 14.1062C16.7232 14.0265 17.1121 14.0555 17.47 14.19C18.3773 14.5286 19.3199 14.7634 20.28 14.89C20.7658 14.9585 21.2094 15.2032 21.5265 15.5765C21.8437 15.9498 22.0122 16.4268 22 16.92Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
               Contact
@@ -720,10 +782,10 @@ function App() {
         }}>
           {/* Hoofdtitel */}
           <h1 className="main-title" style={{
-            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+            fontSize: 'clamp(3rem, 7vw, 5.5rem)',
             fontWeight: '700',
             color: '#333333',
-            lineHeight: '1.2',
+            lineHeight: '1.1',
             margin: '0 0 0 0',
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             letterSpacing: '-0.02em',
@@ -749,9 +811,9 @@ function App() {
                 left: 0,
                 visibility: 'hidden',
                 whiteSpace: 'pre-wrap',
-                fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+                fontSize: 'clamp(3rem, 7vw, 5.5rem)',
                 fontWeight: '700',
-                lineHeight: '1.2',
+                lineHeight: '1.1',
                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 letterSpacing: '-0.02em',
                 width: 'clamp(400px, 95vw, 1200px)'
@@ -765,9 +827,9 @@ function App() {
                 top: 0,
                 left: 0,
                 whiteSpace: 'pre-wrap',
-                fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+                fontSize: 'clamp(3rem, 7vw, 5.5rem)',
                 fontWeight: '700',
-                lineHeight: '1.2',
+                lineHeight: '1.1',
                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 letterSpacing: '-0.02em',
                 width: 'clamp(400px, 95vw, 1200px)'
@@ -811,11 +873,14 @@ function App() {
             Wij maken websites voor jouw bedrijf! Van webdesign tot webdevelopment, nieuwnet ontzorgt van begin tot eind met focus op resultaat.
           </h2>
           
-          {/* Aan de slag knop */}
+          {/* Aan de slag knop en vertrouwensindicator */}
           <div style={{
             display: 'flex',
+            alignItems: 'center',
             justifyContent: 'flex-start',
-            marginTop: '40px'
+            marginTop: '40px',
+            gap: '40px',
+            flexWrap: 'wrap'
           }}>
             <button 
               onClick={() => {
@@ -831,7 +896,7 @@ function App() {
                 backgroundColor: '#0066cc',
                 color: 'white',
                 border: 'none',
-                borderRadius: 'clamp(20px, 4vw, 28px)',
+                borderRadius: 'clamp(16px, 3vw, 24px)',
                 padding: 'clamp(12px, 2.5vw, 16px) clamp(18px, 3.5vw, 24px)',
                 fontSize: 'clamp(14px, 2.5vw, 16px)',
                 fontWeight: '600',
@@ -855,6 +920,102 @@ function App() {
                 <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
+            
+            {/* Vertrouwensindicator met profielfoto's */}
+            <div 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onClick={() => {
+                const portfolioSection = document.querySelector('#portfolio');
+                if (portfolioSection) {
+                  portfolioSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.opacity = '0.8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.opacity = '1';
+              }}
+            >
+              {/* Profielfoto's */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <img 
+                  src={jaimeImage}
+                  alt="Klant 1"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '2px solid white',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    zIndex: 3
+                  }}
+                />
+                <img 
+                  src={florisImage}
+                  alt="Klant 2"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '2px solid white',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    marginLeft: '-8px',
+                    zIndex: 2
+                  }}
+                />
+                <img 
+                  src={carriereStudentImage}
+                  alt="Klant 3"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '2px solid white',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    marginLeft: '-8px',
+                    zIndex: 1
+                  }}
+                />
+              </div>
+              
+              {/* Vertrouwenstekst */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2px'
+              }}>
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#333333',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}>
+                  Vertrouwd door 20+ bedrijven
+                </div>
+                <div style={{
+                  fontSize: '12px',
+                  color: '#666666',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}>
+                  in Nederland
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -868,31 +1029,61 @@ function App() {
         zIndex: '10',
         padding: '20px 0'
       }}>
-        {/* Portfolio anker - nog lager geplaatst */}
+        {/* Portfolio anker */}
         <div id="portfolio" style={{ 
           position: 'absolute', 
-          top: '0px',
+          top: '-120px',
           visibility: 'hidden'
         }}></div>
         
-        {/* Portfolio titel */}
+        {/* Portfolio pill indicator */}
         <div style={{
-          paddingLeft: 'clamp(20px, 4vw, 40px)',
+          display: 'flex',
+          justifyContent: 'center',
           marginBottom: '40px'
         }}>
-          <h2 style={{
-            fontSize: 'clamp(1rem, 2vw, 1.5rem)',
-            fontWeight: '500',
+          <span style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#0066cc',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            backgroundColor: 'rgba(0, 102, 204, 0.1)',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            display: 'inline-block'
+          }}>
+            PORTFOLIO
+          </span>
+        </div>
+        
+        {/* Grote titel boven portfolio blokken */}
+        <div style={{
+          width: '100%',
+          textAlign: 'center',
+          margin: '60px 0 80px 0'
+        }}>
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+            fontWeight: '700',
             color: '#333333',
             margin: '0',
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            letterSpacing: '-0.01em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
+            lineHeight: '1.1',
+            letterSpacing: '-0.02em',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'keep-all',
+            overflowWrap: 'anywhere',
+            hyphens: 'none',
+            WebkitHyphens: 'none',
+            msHyphens: 'none',
+            height: 'auto',
+            minHeight: 'auto'
           }}>
-            Portfolio <span style={{ color: '#0066cc', fontSize: '1.2em' }}>→</span>
-          </h2>
+            Ons werk<br />
+            <span style={{ color: '#0066cc' }}>spreekt</span> voor zichzelf.
+          </h1>
         </div>
         
         <div className="nature-grid" style={{
@@ -917,7 +1108,7 @@ function App() {
         <div className="nature-card" style={{
           width: 'clamp(300px, 35vw, 400px)',
           height: 'clamp(300px, 35vw, 400px)',
-          borderRadius: '24px',
+          borderRadius: '20px',
           overflow: 'hidden',
           backgroundImage: `url(${carriereStudentImage})`,
           backgroundSize: 'cover',
@@ -926,6 +1117,22 @@ function App() {
           cursor: 'pointer',
           transition: 'all 0.3s ease',
           flexShrink: 0
+        }}
+        onMouseEnter={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = '#0066cc';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#ffffff';
+          }
+        }}
+        onMouseLeave={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = 'white';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#333333';
+          }
         }}>
           <div style={{
             position: 'absolute',
@@ -946,7 +1153,7 @@ function App() {
             }}>
               CarrièreStudent
             </h3>
-            <div style={{
+            <div className="arrow-button" style={{
               position: 'absolute',
               top: '20px',
               right: '20px',
@@ -957,10 +1164,11 @@ function App() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              transition: 'all 0.3s ease'
             }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
           </div>
@@ -969,7 +1177,7 @@ function App() {
         <div className="nature-card" style={{
           width: 'clamp(300px, 35vw, 400px)',
           height: 'clamp(300px, 35vw, 400px)',
-          borderRadius: '24px',
+          borderRadius: '20px',
           overflow: 'hidden',
           backgroundImage: `url(${cscImage})`,
           backgroundSize: 'cover',
@@ -978,6 +1186,22 @@ function App() {
           cursor: 'pointer',
           transition: 'all 0.3s ease',
           flexShrink: 0
+        }}
+        onMouseEnter={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = '#0066cc';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#ffffff';
+          }
+        }}
+        onMouseLeave={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = 'white';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#333333';
+          }
         }}>
           <div style={{
             position: 'absolute',
@@ -998,7 +1222,7 @@ function App() {
             }}>
               Circular Shipping Company
             </h3>
-            <div style={{
+            <div className="arrow-button" style={{
               position: 'absolute',
               top: '20px',
               right: '20px',
@@ -1009,10 +1233,11 @@ function App() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              transition: 'all 0.3s ease'
             }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
           </div>
@@ -1021,7 +1246,7 @@ function App() {
         <div className="nature-card" style={{
           width: 'clamp(300px, 35vw, 400px)',
           height: 'clamp(300px, 35vw, 400px)',
-          borderRadius: '24px',
+          borderRadius: '20px',
           overflow: 'hidden',
           backgroundImage: `url(${nature4Image})`,
           backgroundSize: 'cover',
@@ -1030,6 +1255,22 @@ function App() {
           cursor: 'pointer',
           transition: 'all 0.3s ease',
           flexShrink: 0
+        }}
+        onMouseEnter={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = '#0066cc';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#ffffff';
+          }
+        }}
+        onMouseLeave={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = 'white';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#333333';
+          }
         }}>
           <div style={{
             position: 'absolute',
@@ -1050,7 +1291,7 @@ function App() {
             }}>
               Natuur 4
             </h3>
-            <div style={{
+            <div className="arrow-button" style={{
               position: 'absolute',
               top: '20px',
               right: '20px',
@@ -1061,27 +1302,44 @@ function App() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              transition: 'all 0.3s ease'
             }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
+            </div>
+          </div>
         </div>
-      </div>
-      </div>
-      
+        
         <div className="nature-card" style={{
           width: 'clamp(300px, 35vw, 400px)',
           height: 'clamp(300px, 35vw, 400px)',
-          borderRadius: '24px',
+          borderRadius: '20px',
           overflow: 'hidden',
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           position: 'relative',
           cursor: 'pointer',
           transition: 'all 0.3s ease',
           flexShrink: 0
+        }}
+        onMouseEnter={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = '#0066cc';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#ffffff';
+          }
+        }}
+        onMouseLeave={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = 'white';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#333333';
+          }
         }}>
-        <div style={{
+          <div style={{
             position: 'absolute',
             top: 0,
             left: 0,
@@ -1100,7 +1358,7 @@ function App() {
             }}>
               E-commerce Platform
             </h3>
-          <div style={{
+            <div className="arrow-button" style={{
               position: 'absolute',
               top: '20px',
               right: '20px',
@@ -1111,25 +1369,42 @@ function App() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              transition: 'all 0.3s ease'
             }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
           </div>
-          </div>
-          
+        </div>
+        
         <div className="nature-card" style={{
           width: 'clamp(300px, 35vw, 400px)',
           height: 'clamp(300px, 35vw, 400px)',
-          borderRadius: '24px',
+          borderRadius: '20px',
           overflow: 'hidden',
           background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
           position: 'relative',
           cursor: 'pointer',
           transition: 'all 0.3s ease',
           flexShrink: 0
+        }}
+        onMouseEnter={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = '#0066cc';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#ffffff';
+          }
+        }}
+        onMouseLeave={(e) => {
+          const arrowButton = e.currentTarget.querySelector('.arrow-button');
+          if (arrowButton) {
+            arrowButton.style.backgroundColor = 'white';
+            const arrowPath = arrowButton.querySelector('path');
+            if (arrowPath) arrowPath.style.stroke = '#333333';
+          }
         }}>
           <div style={{
             position: 'absolute',
@@ -1150,7 +1425,58 @@ function App() {
             }}>
               Mobile App
             </h3>
+            <div className="arrow-button" style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              transition: 'all 0.3s ease'
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <div className="nature-card" style={{
+          width: 'clamp(300px, 35vw, 400px)',
+          height: 'clamp(300px, 35vw, 400px)',
+          borderRadius: '20px',
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+          position: 'relative',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          flexShrink: 0
+        }}>
           <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            background: 'linear-gradient(rgba(0,0,0,0.7), transparent)',
+            padding: '20px 20px 30px 20px',
+            opacity: '1',
+            transition: 'opacity 0.3s ease'
+          }}>
+            <h3 style={{
+              color: 'white',
+              fontSize: '20px',
+              fontWeight: '600',
+              margin: '0 0 10px 0',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}>
+              Corporate Website
+            </h3>
+            <div style={{
               position: 'absolute',
               top: '20px',
               right: '20px',
@@ -1164,7 +1490,7 @@ function App() {
               boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
             }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
           </div>
@@ -1173,60 +1499,10 @@ function App() {
         <div className="nature-card" style={{
           width: 'clamp(300px, 35vw, 400px)',
           height: 'clamp(300px, 35vw, 400px)',
-              borderRadius: '24px',
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              position: 'relative',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          flexShrink: 0
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(rgba(0,0,0,0.7), transparent)',
-            padding: '20px 20px 30px 20px',
-            opacity: '1',
-            transition: 'opacity 0.3s ease'
-            }}>
-              <h3 style={{
-              color: 'white',
-              fontSize: '20px',
-                fontWeight: '600',
-              margin: '0 0 10px 0',
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              Corporate Website
-              </h3>
-            <div style={{
-                position: 'absolute',
-              top: '20px',
-              right: '20px',
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-            }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
-            </div>
-            
-        <div className="nature-card" style={{
-          width: 'clamp(300px, 35vw, 400px)',
-          height: 'clamp(300px, 35vw, 400px)',
-              borderRadius: '24px',
+          borderRadius: '20px',
           overflow: 'hidden',
           background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-              position: 'relative',
+          position: 'relative',
           cursor: 'pointer',
           transition: 'all 0.3s ease',
           flexShrink: 0
@@ -1240,18 +1516,18 @@ function App() {
             padding: '20px 20px 30px 20px',
             opacity: '1',
             transition: 'opacity 0.3s ease'
-            }}>
-              <h3 style={{
+          }}>
+            <h3 style={{
               color: 'white',
               fontSize: '20px',
-                fontWeight: '600',
+              fontWeight: '600',
               margin: '0 0 10px 0',
               fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}>
               SaaS Dashboard
-              </h3>
+            </h3>
             <div style={{
-                position: 'absolute',
+              position: 'absolute',
               top: '20px',
               right: '20px',
               width: '40px',
@@ -1264,7 +1540,7 @@ function App() {
               boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
             }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
           </div>
@@ -1272,59 +1548,326 @@ function App() {
       </div>
       </div>
       
-      {/* Over ons sectie */}
+      {/* Over ons sectie - tijdelijk leeg */}
+      <div id="over-ons" style={{
+        width: '100%',
+        maxWidth: 'none',
+        marginTop: '120px',
+        position: 'relative',
+        zIndex: '10',
+        padding: '20px 0',
+        minHeight: '200px'
+      }}>
+        {/* Over ons anker */}
+        <div id="over-ons-anchor" style={{ 
+          position: 'absolute', 
+          top: '-120px',
+          visibility: 'hidden'
+        }}></div>
+        {/* Over ons pill indicator */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginBottom: '40px'
+        }}>
+          <span style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#0066cc',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            backgroundColor: 'rgba(0, 102, 204, 0.1)',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            display: 'inline-block'
+          }}>
+            OVER ONS
+          </span>
+        </div>
+        
+        {/* Grote titel boven over ons content */}
+        <div style={{
+          width: '100%',
+          textAlign: 'center',
+          margin: '60px 0 80px 0'
+        }}>
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+            fontWeight: '700',
+            color: '#333333',
+            margin: '0',
+            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            lineHeight: '1.1',
+            letterSpacing: '-0.02em',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'keep-all',
+            overflowWrap: 'anywhere',
+            hyphens: 'none',
+            WebkitHyphens: 'none',
+            msHyphens: 'none',
+            height: 'auto',
+            minHeight: 'auto'
+          }}>
+            Maak kennis met <span style={{ color: '#0066cc' }}>NieuwNet</span>.
+          </h1>
+        </div>
+
+        {/* Foto's sectie */}
+        <div style={{
+          display: 'flex',
+          gap: '24px',
+          padding: '0 20px',
+          marginTop: '0',
+          maxWidth: 'none',
+          width: '100%',
+          justifyContent: 'center',
+          flexWrap: 'wrap'
+        }}>
+          {/* Foto 1 - Jaime Ram */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              width: '300px',
+              height: '300px',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-8px)';
+              e.target.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+            }}>
+              <img 
+                src="/Jaime.jpg" 
+                alt="Jaime Ram" 
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+              />
+            </div>
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#333333',
+              margin: '0',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              textAlign: 'center'
+            }}>
+              Jaime Ram
+            </h3>
+          </div>
+
+          {/* Foto 2 - Floris Keuper */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              width: '300px',
+              height: '300px',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-8px)';
+              e.target.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+            }}>
+              <img 
+                src="/Jaime.jpg" 
+                alt="Floris Keuper" 
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+              />
+            </div>
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#333333',
+              margin: '0',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              textAlign: 'center'
+            }}>
+              Floris Keuper
+            </h3>
+          </div>
+
+          {/* Foto 3 - Pieter den Hartog */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              width: '300px',
+              height: '300px',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-8px)';
+              e.target.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+            }}>
+              <img 
+                src="/Jaime.jpg" 
+                alt="Pieter den Hartog" 
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+              />
+            </div>
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#333333',
+              margin: '0',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              textAlign: 'center'
+            }}>
+              Pieter den Hartog
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      {/* Delft sectie - Gevestigd in Delft */}
       <div style={{
         width: '100%',
         maxWidth: 'none',
         marginTop: '120px',
         position: 'relative',
-        zIndex: 10,
-        padding: '20px 0'
+        backgroundColor: 'white',
+        padding: '80px 0',
+        overflow: 'hidden'
       }}>
-        {/* Over ons anker */}
-        <div id="team" style={{ 
+        
+        {/* Delft anker */}
+        <div id="delft" style={{ 
           position: 'absolute', 
           top: '0px',
           visibility: 'hidden'
         }}></div>
-        
-        {/* Over ons titel */}
+
+        {/* Main content container */}
         <div style={{
-          paddingLeft: 'clamp(20px, 4vw, 40px)',
-          marginBottom: '40px'
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 clamp(20px, 4vw, 40px)',
+          position: 'relative',
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>
-          <h2 style={{
-            fontSize: 'clamp(1rem, 2vw, 1.5rem)',
-            fontWeight: '500',
-            color: '#333333',
-            margin: '0',
-            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            letterSpacing: '-0.01em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
+
+          {/* Header met badge */}
+          <div style={{
+            textAlign: 'left',
+            marginBottom: '60px',
+            maxWidth: '900px',
+            width: '100%'
           }}>
-            Over ons <span style={{ color: '#0066cc', fontSize: '1.2em' }}>→</span>
-          </h2>
-        </div>
-        
-        {/* Over ons content placeholder */}
-        <div style={{
-          padding: '60px 0',
-          textAlign: 'center',
-          color: '#666666',
-          fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-        }}>
-          <p style={{
-            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-            margin: '0',
-            opacity: '0.7'
+            <span style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#0066cc',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              backgroundColor: 'rgba(0, 102, 204, 0.1)',
+              padding: '8px 16px',
+              borderRadius: '20px',
+              display: 'inline-block'
+            }}>
+              ✓ GEVESTIGD IN HET HART VAN DELFT
+            </span>
+            
+            <h2 style={{
+              fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+              fontWeight: '700',
+              color: '#333333',
+              margin: '24px 0 16px 0',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              lineHeight: '1.1',
+              letterSpacing: '-0.02em'
+            }}>
+              Websites Gebouwd Voor<br />
+              <span style={{ color: '#22c55e' }}>Snelheid</span> & <span style={{ color: '#0066cc' }}>Performance</span>.
+            </h2>
+            
+            <p style={{
+              fontSize: 'clamp(1.1rem, 2.5vw, 1.3rem)',
+              color: '#64748b',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              lineHeight: '1.6',
+              margin: '0',
+              maxWidth: '600px'
+            }}>
+              Vanuit het prachtige Delft bouwen wij moderne websites die jouw bedrijf online onverslaanbaar maken. Lokale expertise, wereldwijde ambities.
+            </p>
+          </div>
+
+          {/* Afbeelding */}
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '900px',
+            marginBottom: '60px'
           }}>
-            Over ons sectie - content komt hier
-          </p>
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              height: 'clamp(300px, 40vw, 400px)',
+              borderRadius: '20px',
+              overflow: 'hidden',
+              backgroundImage: `url(/OverDelft.png)`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}>
+            </div>
+          </div>
+
+
+
         </div>
+
       </div>
-      
+
       {/* Diensten sectie */}
       <div style={{
         width: '100%',
@@ -1337,45 +1880,700 @@ function App() {
         {/* Diensten anker */}
         <div id="diensten" style={{ 
           position: 'absolute', 
-          top: '0px',
+          top: '-120px',
           visibility: 'hidden'
         }}></div>
         
-        {/* Diensten titel */}
+        {/* Diensten pill indicator */}
         <div style={{
-          paddingLeft: 'clamp(20px, 4vw, 40px)',
+          display: 'flex',
+          justifyContent: 'center',
           marginBottom: '40px'
         }}>
-          <h2 style={{
-            fontSize: 'clamp(1rem, 2vw, 1.5rem)',
-            fontWeight: '500',
-            color: '#333333',
-            margin: '0',
+          <span style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#0066cc',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            letterSpacing: '-0.01em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
+            backgroundColor: 'rgba(0, 102, 204, 0.1)',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            display: 'inline-block'
           }}>
-            Diensten <span style={{ color: '#0066cc', fontSize: '1.2em' }}>→</span>
-          </h2>
+            DIENSTEN
+          </span>
         </div>
         
-        {/* Diensten content placeholder */}
+        {/* Diensten intro */}
         <div style={{
-          padding: '60px 0',
           textAlign: 'center',
-          color: '#666666',
-          fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          marginBottom: '60px',
+          padding: '0 clamp(20px, 4vw, 40px)'
         }}>
-          <p style={{
-            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-            margin: '0',
-            opacity: '0.7'
+          <h3 style={{
+            fontSize: 'clamp(3rem, 6vw, 4rem)',
+            fontWeight: '700',
+            color: '#333333',
+            margin: '0 0 20px 0',
+            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            letterSpacing: '-0.02em',
+            lineHeight: '1.1'
           }}>
-            Diensten sectie - content komt hier
+            Kies een plan<br />
+            dat werkt voor <span style={{ color: '#0066cc' }}>Jou</span>.
+          </h3>
+          <p style={{
+            fontSize: 'clamp(1.1rem, 2.5vw, 1.3rem)',
+            color: '#64748b',
+            margin: '0 auto',
+            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            lineHeight: '1.6',
+            maxWidth: '600px'
+          }}>
+            Eenvoudig layouts aanpassen, content bijwerken en je website personaliseren met onze intuïtieve oplossingen—geen programmeerkennis vereist.
           </p>
         </div>
+
+        {/* Pricing toggle */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginBottom: '60px'
+        }}>
+          <div style={{
+            position: 'relative',
+            display: 'flex',
+            backgroundColor: 'white',
+            borderRadius: '24px',
+            padding: '4px',
+            width: 'fit-content',
+            margin: '0 auto',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+          }}>
+            {/* Sliding pill background */}
+            <div style={{
+              position: 'absolute',
+              top: '4px',
+              left: !includeBTW ? '4px' : 'calc(50% - 4px)',
+              width: 'calc(50% - 4px)',
+              height: 'calc(100% - 8px)',
+              backgroundColor: '#0066cc',
+              borderRadius: '20px',
+              transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              zIndex: 1
+            }}></div>
+            
+            <button 
+              onClick={() => setIncludeBTW(false)}
+              style={{
+                position: 'relative',
+                zIndex: 2,
+                padding: '12px 24px',
+                borderRadius: '20px',
+                border: 'none',
+                fontSize: '16px',
+                fontWeight: '600',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                cursor: 'pointer',
+                transition: 'color 0.3s ease',
+                backgroundColor: 'transparent',
+                color: !includeBTW ? 'white' : '#64748b',
+                minWidth: '120px'
+              }}>
+              Excl. BTW
+            </button>
+            <button 
+              onClick={() => setIncludeBTW(true)}
+              style={{
+                position: 'relative',
+                zIndex: 2,
+                padding: '12px 24px',
+                borderRadius: '20px',
+                border: 'none',
+                fontSize: '16px',
+                fontWeight: '600',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                cursor: 'pointer',
+                transition: 'color 0.3s ease',
+                backgroundColor: 'transparent',
+                color: includeBTW ? 'white' : '#64748b',
+                minWidth: '120px'
+              }}>
+              Incl. BTW
+            </button>
+          </div>
+        </div>
+
+        {/* Pricing cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '32px',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 clamp(20px, 4vw, 40px)'
+        }}>
+          {/* One Page pakket */}
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '24px',
+            padding: '40px 32px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+            border: '1px solid #e2e8f0',
+            transition: 'all 0.3s ease',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '16px'
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0066cc" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9,12 12,15 23,4"/>
+              </svg>
+              <h3 style={{
+                fontSize: '24px',
+                fontWeight: '600',
+                color: '#333333',
+                margin: '0',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                One Page Website
+              </h3>
+            </div>
+            
+            <p style={{
+              fontSize: '16px',
+              color: '#64748b',
+              margin: '0 0 24px 0',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              lineHeight: '1.6'
+            }}>
+              Perfect voor kleine bedrijven.
+            </p>
+            
+            <div style={{
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '8px',
+                marginBottom: '8px'
+              }}>
+                <span style={{
+                  fontSize: '48px',
+                  fontWeight: '700',
+                  color: '#333333',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}>
+                  €{includeBTW ? '725' : '599'}
+                </span>
+                <span style={{
+                  fontSize: '16px',
+                  color: '#64748b',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}>
+                  / eenmalig
+                </span>
+              </div>
+              <p style={{
+                fontSize: '14px',
+                color: '#64748b',
+                margin: '0',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                {includeBTW ? 'Incl. BTW (€599 + 21% BTW)' : 'Excl. BTW'}
+              </p>
+            </div>
+
+            <button style={{
+              width: '100%',
+              padding: '16px 24px',
+              borderRadius: '20px',
+              border: '2px solid #e2e8f0',
+              backgroundColor: 'white',
+              color: '#0066cc',
+              fontSize: '16px',
+              fontWeight: '600',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              marginBottom: '32px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#f8fafc';
+              e.target.style.borderColor = '#0066cc';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'white';
+              e.target.style.borderColor = '#e2e8f0';
+            }}
+            onClick={() => selectPackage({
+              name: 'One Page Website',
+              price: includeBTW ? '€725' : '€599',
+              description: 'Perfect voor kleine bedrijven die een professionele online aanwezigheid willen.',
+              features: ['1 pagina', 'Responsive design', 'Contact formulier', '1 jaar hosting gratis', 'SSL certificaat']
+            })}>
+              Start vandaag
+            </button>
+
+            <div style={{
+              marginBottom: '32px',
+              flex: 1
+            }}>
+              {[
+                '1 pagina',
+                'Responsive design',
+                'Contact formulier',
+                '1 jaar hosting gratis',
+                'SSL certificaat'
+              ].map((feature, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '12px'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e8f5e8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6L9 17L4 12" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <span style={{
+                    fontSize: '16px',
+                    color: '#333333',
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}>
+                    {feature}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Professional pakket */}
+          <div style={{
+            backgroundColor: '#0066cc',
+            borderRadius: '24px',
+            padding: '40px 32px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+            border: '1px solid #0066cc',
+            transition: 'all 0.3s ease',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '16px'
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9,12 12,15 23,4"/>
+              </svg>
+              <h3 style={{
+                fontSize: '24px',
+                fontWeight: '600',
+                color: 'white',
+                margin: '0',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                Professional Website
+              </h3>
+            </div>
+            
+            <p style={{
+              fontSize: '16px',
+              color: 'white',
+              margin: '0 0 24px 0',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              lineHeight: '1.6'
+            }}>
+              Voor groeiende bedrijven.
+            </p>
+            
+            <div style={{
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '8px',
+                marginBottom: '8px'
+              }}>
+                <span style={{
+                  fontSize: '48px',
+                  fontWeight: '700',
+                  color: 'white',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}>
+                  €{includeBTW ? '2419' : '1999'}
+                </span>
+                <span style={{
+                  fontSize: '16px',
+                  color: 'rgba(173, 216, 230, 0.9)',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}>
+                  / eenmalig
+                </span>
+              </div>
+              <p style={{
+                fontSize: '14px',
+                color: 'rgba(173, 216, 230, 0.9)',
+                margin: '0',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                {includeBTW ? 'Incl. BTW (€1999 + 21% BTW)' : 'Excl. BTW'}
+              </p>
+            </div>
+
+            <button style={{
+              width: '100%',
+              padding: '16px 24px',
+              borderRadius: '20px',
+              border: '2px solid rgba(173, 216, 230, 0.8)',
+              backgroundColor: 'transparent',
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: '600',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              marginBottom: '32px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'rgba(173, 216, 230, 0.2)';
+              e.target.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.color = 'white';
+            }}
+            onClick={() => selectPackage({
+              name: 'Professional Website',
+              price: includeBTW ? '€2419' : '€1999',
+              description: 'Voor groeiende bedrijven die een uitgebreide, professionele website nodig hebben.',
+              features: ['Tot 15 pagina\'s', 'Custom design', 'CMS systeem', 'Blog functionaliteit', 'Google Analytics', 'SEO optimalisatie', '2 jaar hosting gratis', 'Onderhoud eerste jaar']
+            })}>
+              Start vandaag
+            </button>
+
+            <div style={{
+              marginBottom: '32px',
+              flex: 1
+            }}>
+              {[
+                'Tot 15 pagina\'s',
+                'Custom design',
+                'CMS systeem',
+                'Blog functionaliteit',
+                'Google Analytics',
+                'SEO optimalisatie',
+                '2 jaar hosting gratis',
+                'Onderhoud eerste jaar'
+              ].map((feature, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '12px'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(173, 216, 230, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6L9 17L4 12" stroke="rgba(173, 216, 230, 0.9)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <span style={{
+                    fontSize: '16px',
+                    color: 'white',
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}>
+                    {feature}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+
+          {/* Enterprise Card */}
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '24px',
+            padding: '40px 32px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+            border: '1px solid #e2e8f0',
+            transition: 'all 0.3s ease',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '16px'
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0066cc" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9,12 12,15 23,4"/>
+              </svg>
+              <h3 style={{
+                fontSize: '24px',
+                fontWeight: '600',
+                color: '#333333',
+                margin: '0',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                Applicatie
+              </h3>
+            </div>
+            
+            <p style={{
+              fontSize: '16px',
+              color: '#64748b',
+              margin: '0 0 24px 0',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              lineHeight: '1.6'
+            }}>
+              Voor web- en mobiele applicaties.
+            </p>
+            
+            <div style={{
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '8px',
+                marginBottom: '8px'
+              }}>
+                <span style={{
+                  fontSize: '36px',
+                  fontWeight: '700',
+                  color: '#333333',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}>
+                  Op Aanvraag
+                </span>
+
+              </div>
+              <p style={{
+                fontSize: '14px',
+                color: '#64748b',
+                margin: '0',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                Persoonlijke consultatie en offerte.
+              </p>
+            </div>
+
+            <button style={{
+              width: '100%',
+              padding: '16px 24px',
+              borderRadius: '20px',
+              border: '2px solid #e2e8f0',
+              backgroundColor: 'white',
+              color: '#0066cc',
+              fontSize: '16px',
+              fontWeight: '600',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              marginBottom: '32px'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#f8fafc';
+              e.target.style.borderColor = '#0066cc';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'white';
+              e.target.style.borderColor = '#e2e8f0';
+            }}
+            onClick={() => selectPackage({
+              name: 'Applicatie Website',
+              price: 'Op Aanvraag',
+              description: 'Voor web- en mobiele applicaties.',
+              features: ['Web & mobiele applicatie', 'Database ontwerp & beheer', 'API ontwikkeling', 'User authentication systeem', 'Cloud hosting & scaling', 'Real-time functionaliteiten', 'Analytics & reporting', 'Security & compliance', 'Onderhoud & support', 'Performance monitoring']
+            })}>
+              Start vandaag
+            </button>
+
+            <div style={{
+              marginBottom: '32px',
+              flex: 1
+            }}>
+              {[
+                'Web & mobiele applicatie',
+                'Database ontwerp & beheer',
+                'API ontwikkeling',
+                'User authentication systeem',
+                'Cloud hosting & scaling',
+                'Real-time functionaliteiten',
+                'Analytics & reporting',
+                'Security & compliance',
+                'Onderhoud & support',
+                'Performance monitoring'
+              ].map((feature, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '12px'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e8f5e8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6L9 17L4 12" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <span style={{
+                    fontSize: '16px',
+                    color: '#334155',
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}>
+                    {feature}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Nog Vragen? Button */}
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 clamp(20px, 4vw, 40px)',
+          marginTop: '40px',
+          marginBottom: '40px'
+        }}>
+          <button
+            onClick={() => {
+              // Zet de gesprek aanvraag state
+              setSelectedConversation(true);
+              setSelectedPackage(null); // Reset package selection
+              
+              // Zet het onderwerp voor een gesprek aanvraag
+              setContactFormData(prev => ({
+                ...prev,
+                subject: 'Aanvraag gesprek'
+              }));
+              
+              // Scroll naar contact sectie
+              const contactSection = document.querySelector('#contact');
+              if (contactSection) {
+                contactSection.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            style={{
+              backgroundColor: 'white',
+              color: '#0066cc',
+              border: '2px solid #0066cc',
+              borderRadius: '50px',
+              padding: '20px 40px',
+              fontSize: '18px',
+              fontWeight: '600',
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              cursor: 'pointer',
+              transition: 'all 0.4s ease',
+              boxShadow: '0 4px 20px rgba(0, 102, 204, 0.1)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.color = 'white';
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 25px rgba(0, 102, 204, 0.3)';
+              
+              // Blue fill effect from left to right
+              const fillElement = e.target.querySelector('.button-fill');
+              if (fillElement) {
+                fillElement.style.transform = 'translateX(0)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.color = '#0066cc';
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 20px rgba(0, 102, 204, 0.1)';
+              
+              // Blue fill effect from right to left (empty out)
+              const fillElement = e.target.querySelector('.button-fill');
+              if (fillElement) {
+                fillElement.style.transform = 'translateX(-100%)';
+              }
+            }}
+          >
+            {/* Blue fill element for hover effect */}
+            <div 
+              className="button-fill"
+              style={{
+                position: 'absolute',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#0066cc',
+                transform: 'translateX(-100%)',
+                transition: 'transform 0.4s ease',
+                zIndex: '-1'
+              }}
+            />
+            
+            <span style={{ fontSize: '18px', fontWeight: '500', position: 'relative', zIndex: '1' }}>Nog vragen?</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', zIndex: '1' }}>
+              <span style={{ fontSize: '18px', fontWeight: '600' }}>Plan een gesprek</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 16.92V19.92C22.0011 20.1985 21.9441 20.4742 21.8325 20.7293C21.7209 20.9845 21.5573 21.2136 21.3521 21.4019C21.1468 21.5901 20.9046 21.7335 20.6407 21.8227C20.3769 21.9119 20.0974 21.9451 19.82 21.92C16.7428 21.5856 13.787 20.5341 11.19 18.85C8.77382 17.3147 6.72533 15.2662 5.18999 12.85C3.49997 10.2412 2.44824 7.271 2.11999 4.18C2.095 3.90347 2.12787 3.62476 2.21649 3.36162C2.30512 3.09849 2.44756 2.85669 2.63476 2.65162C2.82196 2.44655 3.0498 2.28271 3.30379 2.17052C3.55777 2.05833 3.83233 2.00026 4.10999 2H7.10999C7.59531 1.99522 8.06679 2.16708 8.43376 2.48353C8.80073 2.79999 9.04207 3.23945 9.11999 3.72C9.23662 4.68007 9.47144 5.62273 9.81999 6.53C9.94454 6.88792 9.97366 7.27691 9.9039 7.65088C9.83415 8.02485 9.6682 8.36811 9.42499 8.64L8.08999 9.97C9.51355 12.4584 11.5416 14.4864 14.03 15.91L15.36 14.58C15.6319 14.3368 15.9751 14.1708 16.3491 14.1011C16.7231 14.0313 17.1121 14.0605 17.47 14.185C18.3773 14.5335 19.3199 14.7683 20.28 14.885C20.7658 14.9636 21.2094 15.2071 21.5265 15.5775C21.8437 15.9479 22.0122 16.4216 22 16.92Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </button>
+        </div>
+
       </div>
       
       {/* Contact sectie */}
@@ -1385,51 +2583,31 @@ function App() {
         marginTop: '120px',
         position: 'relative',
         zIndex: '10',
-        backgroundColor: '#f0f8ff',
+        backgroundColor: 'white',
         padding: '20px 0 80px 0',
         overflow: 'hidden'
       }}>
-        {/* Grote achtergrondafbeelding */}
+
+        {/* Contact pill indicator */}
         <div style={{
-          position: 'absolute',
-          top: '50%',
-          right: '-40%',
-          transform: 'translateY(-50%)',
-          width: 'clamp(1125px, 150vw, 2250px)',
-          height: 'clamp(1125px, 150vw, 2250px)',
-          backgroundImage: `url(${process.env.PUBLIC_URL}/ICOON.png)`,
-          backgroundSize: 'contain',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
-          opacity: '0.08',
-          zIndex: '1',
-          pointerEvents: 'none'
-        }}></div>
-        {/* Contact anker */}
-        <div id="contact" style={{ 
-          position: 'absolute', 
-          top: '0px',
-          visibility: 'hidden'
-        }}></div>
-        
-        {/* Contact titel */}
-        <div style={{
-          paddingLeft: 'clamp(20px, 4vw, 40px)',
+          display: 'flex',
+          justifyContent: 'center',
           marginBottom: '40px'
         }}>
-          <h2 style={{
-            fontSize: 'clamp(1rem, 2vw, 1.5rem)',
-            fontWeight: '500',
-            color: '#333333',
-            margin: '0',
+          <span style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#0066cc',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            letterSpacing: '-0.01em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
+            backgroundColor: 'rgba(0, 102, 204, 0.1)',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            display: 'inline-block'
           }}>
-            Contact <span style={{ color: '#0066cc', fontSize: '1.2em' }}>→</span>
-          </h2>
+            CONTACT
+          </span>
         </div>
         
         {/* Contact introductie */}
@@ -1437,6 +2615,12 @@ function App() {
           textAlign: 'center',
           marginBottom: '60px'
         }}>
+          {/* Contact anker */}
+          <div id="contact" style={{ 
+            position: 'absolute', 
+            top: '-120px',
+            visibility: 'hidden'
+          }}></div>
           <h3 style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)',
             fontWeight: '700',
@@ -1446,7 +2630,7 @@ function App() {
             letterSpacing: '-0.02em',
             lineHeight: '1.2'
           }}>
-            Klaar om te starten?
+            Klaar om te <span style={{ color: '#0066cc' }}>Starten</span>?
           </h3>
           <p style={{
             fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
@@ -1469,6 +2653,8 @@ function App() {
           position: 'relative',
           zIndex: 2
         }}>
+
+
           
           {/* Contact formulier en direct contact */}
           <div style={{
@@ -1483,7 +2669,7 @@ function App() {
                         {/* Direct contact sectie */}
             <div style={{
               backgroundColor: 'white',
-              borderRadius: '24px',
+              borderRadius: '20px',
               padding: '40px',
               boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)'
             }}>
@@ -1559,7 +2745,7 @@ function App() {
                 
                 {/* Email */}
                 <a 
-                  href="mailto:info@nieuwnet.nl"
+                    href="mailto:contact@nieuw-net.nl"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1607,7 +2793,7 @@ function App() {
                       color: '#333333',
                       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
                     }}>
-                      info@nieuwnet.nl
+                      contact@nieuw-net.nl
                     </div>
                   </div>
                 </a>
@@ -1676,11 +2862,203 @@ function App() {
             {/* Contact formulier */}
             <div style={{
               backgroundColor: 'white',
-              borderRadius: '24px',
+              borderRadius: '20px',
               padding: '40px',
               boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)'
             }}>
-              <form style={{
+              
+              {/* Subtiele pakket indicator binnen formulier */}
+              {selectedPackage && (
+                <div style={{
+                  backgroundColor: '#f0f8ff',
+                  borderLeft: '4px solid #0066cc',
+                  borderRadius: '0 6px 6px 0',
+                  padding: '12px 16px',
+                  marginBottom: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    flex: 1
+                  }}>
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      backgroundColor: '#22c55e',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <span style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#333',
+                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>
+                        {selectedPackage.name}
+                      </span>
+                      <span style={{
+                        fontSize: '14px',
+                        color: '#666',
+                        marginLeft: '8px',
+                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>
+                        • {selectedPackage.price}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedPackage(null);
+                      setContactFormData(prev => ({ ...prev, subject: '', message: '' }));
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#666',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      padding: '4px',
+                      borderRadius: '3px',
+                      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
+              {/* Gesprek aanvraag indicator binnen formulier */}
+              {selectedConversation && (
+                <div style={{
+                  backgroundColor: '#f0f8ff',
+                  borderLeft: '4px solid #0066cc',
+                  borderRadius: '0 6px 6px 0',
+                  padding: '12px 16px',
+                  marginBottom: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    flex: 1
+                  }}>
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      backgroundColor: '#22c55e',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 12H8.01M12 12H12.01M16 12H16.01M21 12C21 16.9706 16.9706 21 12 21C10.4001 21 8.88837 20.6246 7.54704 19.9565C7.19117 19.7781 6.78393 19.72 6.39939 19.8229L4.17335 20.4182C3.20701 20.677 2.32299 19.793 2.5818 18.8267L3.17712 16.6006C3.28001 16.2161 3.22194 15.8088 3.04346 15.453C2.37538 14.1116 2 12.5999 2 12C2 7.02944 6.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <span style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#333',
+                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>
+                        Vrijblijvend Gesprek
+                      </span>
+                      <span style={{
+                        fontSize: '14px',
+                        color: '#666',
+                        marginLeft: '8px',
+                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      }}>
+                        • Gratis consultatie
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedConversation(false);
+                      setContactFormData(prev => ({ ...prev, subject: '', message: '' }));
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#666',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      padding: '4px',
+                      borderRadius: '3px',
+                      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
+              {isFormSubmitted ? (
+                // Bedankbericht
+                <div style={{
+                  textAlign: 'center',
+                  padding: '60px 40px',
+                  backgroundColor: 'rgba(34, 197, 94, 0.05)',
+                  borderRadius: '20px',
+                  border: '2px solid rgba(34, 197, 94, 0.2)'
+                }}>
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 24px auto'
+                  }}>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <h3 style={{
+                    fontSize: '28px',
+                    fontWeight: '700',
+                    color: '#22c55e',
+                    margin: '0 0 16px 0',
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}>
+                    Bedankt voor je aanvraag!
+                  </h3>
+                  <p style={{
+                    fontSize: '18px',
+                    color: '#374151',
+                    margin: '0',
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    lineHeight: '1.6'
+                  }}>
+                    We nemen zo snel mogelijk contact met je op.
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={handleContactSubmit} style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '24px'
@@ -1705,11 +3083,14 @@ function App() {
                     <input 
                       type="text" 
                       required
+                      value={contactFormData.name}
+                      onChange={(e) => setContactFormData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Uw volledige naam"
                       style={{
                         width: '100%',
                         padding: '16px',
                         border: '2px solid #e1e5e9',
-                        borderRadius: '12px',
+                        borderRadius: '20px',
                         fontSize: '16px',
                         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                         transition: 'all 0.3s ease',
@@ -1740,11 +3121,14 @@ function App() {
                     <input 
                       type="email" 
                       required
+                      value={contactFormData.email}
+                      onChange={(e) => setContactFormData(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="uw.email@voorbeeld.nl"
                       style={{
                         width: '100%',
                         padding: '16px',
                         border: '2px solid #e1e5e9',
-                        borderRadius: '12px',
+                        borderRadius: '20px',
                         fontSize: '16px',
                         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                         transition: 'all 0.3s ease',
@@ -1776,11 +3160,53 @@ function App() {
                   </label>
                   <input 
                     type="text" 
+                      value={contactFormData.company}
+                      onChange={(e) => setContactFormData(prev => ({ ...prev, company: e.target.value }))}
+                      placeholder="Uw bedrijfsnaam (optioneel)"
+                      style={{
+                      width: '100%',
+                      padding: '16px',
+                      border: '2px solid #e1e5e9',
+                      borderRadius: '20px',
+                      fontSize: '16px',
+                      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                      transition: 'all 0.3s ease',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#0066cc';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(0, 102, 204, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#e1e5e9';
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+                
+                {/* Onderwerp */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#333333',
+                    marginBottom: '8px',
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}>
+                    Onderwerp *
+                  </label>
+                  <input 
+                    type="text" 
+                    required
+                    value={contactFormData.subject}
+                    onChange={(e) => setContactFormData(prev => ({ ...prev, subject: e.target.value }))}
+                    placeholder={(selectedPackage || selectedConversation) ? "Onderwerp is automatisch ingevuld" : "Wat is het onderwerp van uw bericht?"}
                     style={{
                       width: '100%',
                       padding: '16px',
                       border: '2px solid #e1e5e9',
-                      borderRadius: '12px',
+                      borderRadius: '20px',
                       fontSize: '16px',
                       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                       transition: 'all 0.3s ease',
@@ -1812,11 +3238,14 @@ function App() {
                   <textarea 
                     required
                     rows="5"
+                    value={contactFormData.message}
+                    onChange={(e) => setContactFormData(prev => ({ ...prev, message: e.target.value }))}
+                    placeholder="Beschrijf hier uw wensen, vragen en eventuele specifieke eisen..."
                     style={{
                       width: '100%',
                       padding: '16px',
                       border: '2px solid #e1e5e9',
-                      borderRadius: '12px',
+                      borderRadius: '20px',
                       fontSize: '16px',
                       fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                       transition: 'all 0.3s ease',
@@ -1842,7 +3271,7 @@ function App() {
                     backgroundColor: '#0066cc',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '12px',
+                    borderRadius: '20px',
                     padding: '18px 32px',
                     fontSize: '16px',
                     fontWeight: '600',
@@ -1867,7 +3296,7 @@ function App() {
                     e.target.style.boxShadow = '0 4px 12px rgba(0, 102, 204, 0.3)';
                   }}
                 >
-                  Verstuur bericht
+{(selectedPackage || selectedConversation) ? 'Verstuur aanvraag' : 'Verstuur'}
                   <svg 
                     width="20" 
                     height="20" 
@@ -1888,6 +3317,7 @@ function App() {
                   </svg>
                 </button>
               </form>
+              )}
             </div>
           </div>
         </div>
@@ -1927,7 +3357,7 @@ function App() {
                     src={logoImage} 
                     alt="NieuwNet Logo" 
                     style={{ 
-                      height: '50px', 
+                      height: '36px', 
                       width: 'auto',
                       marginLeft: '0',
                       cursor: 'pointer',
@@ -2040,6 +3470,21 @@ function App() {
                 flexDirection: 'column',
                   gap: '12px'
                 }}>
+                <a href="#over-ons-anchor" style={{
+                    fontSize: '16px',
+                    color: '#666',
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    textDecoration: 'none',
+                    transition: 'color 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.color = '#0066cc';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.color = '#666';
+                  }}>
+                  Over ons
+                </a>
                 <a href="#portfolio" style={{
                     fontSize: '16px',
                     color: '#666',
@@ -2070,21 +3515,7 @@ function App() {
                   }}>
                   Diensten
                 </a>
-                <a href="#team" style={{
-                  fontSize: '16px',
-                  color: '#666',
-                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                  textDecoration: 'none',
-                  transition: 'color 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.color = '#0066cc';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.color = '#666';
-                }}>
-                  Over ons
-                </a>
+
                 <a href="#contact" style={{
                     fontSize: '16px',
                     color: '#666',
@@ -2178,7 +3609,11 @@ function App() {
           </div>
         </div>
       </footer>
-  </div>
+
+      {/* Vercel Speed Insights */}
+      <SpeedInsights />
+
+    </div>
   );
 }
 
