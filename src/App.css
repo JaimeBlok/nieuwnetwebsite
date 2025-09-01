@@ -15,6 +15,9 @@ html, body {
   -webkit-background-color: #ffffff;
   -moz-background-color: #ffffff;
   background: #ffffff;
+  /* Behoud native scroll gedrag */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 /* Specifieke styling voor iPhone en Safari */
@@ -23,6 +26,9 @@ html, body {
     /* iPhone-specifieke optimalisaties */
     background-color: #ffffff !important;
     -webkit-background-color: #ffffff !important;
+    /* Optimaliseerde scroll voor iOS */
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
   }
 }
 
@@ -81,6 +87,9 @@ html, body {
 .nature-grid {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
   scrollbar-width: none;  /* Firefox */
+  /* Optimaliseer scroll voor portfolio sectie */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
 @keyframes fadeIn {
@@ -194,6 +203,9 @@ html, body {
 /* Smooth transitions voor alle elementen - verbeterd */
 * {
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Behoud native scroll voor alle elementen */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: auto;
 }
 
 /* Specifieke smooth animaties voor navigatie */
@@ -286,7 +298,7 @@ body.form-open {
   overflow: hidden;
   
   /* Uniforme styling voor alle schermformaten */
-  padding: 0 clamp(20px, 4vw, 80px) !important;
+  padding: 0 clamp(10px, 2vw, 40px) !important;
   height: clamp(70px, 10vw, 100px) !important;
   display: flex !important;
   justify-content: space-between !important;
@@ -307,7 +319,7 @@ body.form-open {
 /* Desktop menu styling */
 .desktop-menu {
   display: flex !important;
-  gap: clamp(15px, 2.5vw, 40px) !important;
+  gap: clamp(4px, 1vw, 12px) !important;
   align-items: center !important;
   z-index: 1001 !important;
   margin-left: auto !important;
@@ -727,7 +739,7 @@ textarea.error::placeholder {
   position: relative;
   transition: all 0.3s ease;
   border-radius: 20px;
-  padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+  padding: clamp(4px, 0.8vw, 6px) clamp(8px, 1.2vw, 10px);
 }
 
 .desktop-menu a:hover {
@@ -745,6 +757,55 @@ html {
   outline-offset: 2px;
 }
 
+/* Services grid responsive styling - 2 pakketten layout */
+.services-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr; /* Professional pakket wat groter */
+  gap: clamp(16px, 3vw, 32px);
+  padding: 0 clamp(20px, 4vw, 40px);
+  max-width: 1200px;
+  margin: 0 auto 60px auto;
+}
+
+/* Op grote schermen: Professional pakket groter */
+@media (min-width: 1024px) {
+  .services-grid {
+    grid-template-columns: 1fr 1.3fr;
+  }
+}
+
+/* Op tablets: behoud 2 kolommen gelijke breedte */
+@media (max-width: 1023px) and (min-width: 641px) {
+  .services-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Op mobiel: altijd 1 kolom met extra spacing */
+@media (max-width: 640px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: clamp(32px, 6vw, 40px);
+    padding: 0 clamp(16px, 4vw, 20px);
+  }
+}
+
+/* Extra kleine mobiele apparaten */
+@media (max-width: 480px) {
+  .services-grid {
+    gap: clamp(28px, 7vw, 36px);
+    padding: 0 clamp(12px, 3vw, 16px);
+    margin: 0 auto 80px auto;
+  }
+}
+
+/* Extra padding voor services sectie op mobiel */
+@media (max-width: 768px) {
+  .services-grid {
+    margin: 0 auto 70px auto;
+  }
+}
+
 /* Zorg ervoor dat de header goed werkt op alle schermformaten */
 @media (max-width: 1024px) {
   .desktop-menu {
@@ -753,5 +814,43 @@ html {
   
   .hamburger-menu-button {
     display: flex !important;
+  }
+}
+
+/* Responsive styling voor over ons sectie */
+@media (max-width: 768px) {
+  .about-header-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+    text-align: center;
+  }
+  
+  .about-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  .about-team-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  
+  .about-decorative-shapes {
+    display: none !important;
+  }
+}
+
+/* Specifieke styling voor touch apparaten - minder agressief */
+@media (pointer: coarse) {
+  html, body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+  
+  .nature-grid {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
   }
 }
