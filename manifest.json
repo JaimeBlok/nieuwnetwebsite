@@ -1,0 +1,16 @@
+{
+  "short_name": "nieuwnet",
+  "name": "nieuwnet - Uw Partner in Digitale Innovatie",
+  "icons": [
+    {
+      "src": "Nenkel.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#0a0a0a",
+  "description": "Uw partner in digitale innovatie. Wij creëren moderne, gebruiksvriendelijke websites die uw bedrijf laten groeien."
+}
