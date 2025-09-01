@@ -2622,13 +2622,13 @@ function App() {
             visibility: 'hidden'
           }}></div>
           <h3 style={{
-            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+            fontSize: 'clamp(3rem, 6vw, 4rem)',
             fontWeight: '700',
             color: '#333333',
             margin: '0 0 20px 0',
-            fontFamily: 'SF Pro Text, SF Pro Icons, Helvetica Neue, Helvetica, Arial, sans-serif',
+            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             letterSpacing: '-0.02em',
-            lineHeight: '1.2'
+            lineHeight: '1.1'
           }}>
             Klaar om te <span style={{ color: '#0066cc' }}>Starten</span>?
           </h3>
