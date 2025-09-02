@@ -7,12 +7,16 @@
       "config": {
         "distDir": "build"
       }
+    },
+    {
+      "src": "api/contact.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/contact",
+      "dest": "/api/contact"
     },
     {
       "src": "/(.*)",
