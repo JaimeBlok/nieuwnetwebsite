@@ -75,9 +75,6 @@ function App() {
       const footer = document.querySelector('footer');
       
       if (footer) {
-        const footerTop = footer.offsetTop;
-        const scrollPosition = window.scrollY + window.innerHeight;
-        
         // Contact button visibility logic removed
       }
     };
