@@ -229,7 +229,7 @@ function App() {
         }
       } catch (error) {
         console.error('Verzending mislukt:', error);
-        alert(`Kan email niet verzenden: ${error.message}\n\nControleer of verzend.php correct geïnstalleerd is op de server.`);
+        alert(`Kan email niet verzenden: ${error.message}\n\nProbeer het later opnieuw of neem direct contact op.`);
       }
     }
   };
