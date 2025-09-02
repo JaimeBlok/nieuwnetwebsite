@@ -1,9 +1,9 @@
 // Vercel serverless function voor het contactformulier
 // Deze functie draait op Vercel's servers en verstuurt emails via TransIP SMTP
 
-import nodemailer from 'nodemailer';
+const nodemailer = require('nodemailer');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Alleen POST requests toestaan
   if (req.method !== 'POST') {
     return res.status(405).json({ 
