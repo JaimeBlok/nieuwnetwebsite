@@ -78,12 +78,7 @@ function App() {
         const footerTop = footer.offsetTop;
         const scrollPosition = window.scrollY + window.innerHeight;
         
-        // Verberg de knop alleen wanneer we bij de footer komen
-        if (scrollPosition >= footerTop) {
-          setShowContactButton(false);
-        } else {
-          setShowContactButton(true);
-        }
+        // Contact button visibility logic removed
       }
     };
 
@@ -181,7 +176,7 @@ function App() {
     if (!contactFormData.subject.trim()) errors.subject = 'Onderwerp is verplicht';
     if (!contactFormData.message.trim()) errors.message = 'Bericht is verplicht';
     
-    setFormErrors(errors);
+    // Form errors handling removed
     
     if (Object.keys(errors).length === 0) {
       try {
