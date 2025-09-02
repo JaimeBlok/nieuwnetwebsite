@@ -14,12 +14,12 @@ import florisImage from './images/Floris.jpeg';
 function App() {
   const [displayText, setDisplayText] = useState('');
   const [showCursor, setShowCursor] = useState(true);
-  const [showContactButton, setShowContactButton] = useState(true);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isContactFormOpen, setIsContactFormOpen] = useState(false);
-  const [isContactButtonExpanded, setIsContactButtonExpanded] = useState(false);
+
+
   const [currentSection, setCurrentSection] = useState('over-ons');
-  const [scrollY, setScrollY] = useState(0);
+
   const [contactFormData, setContactFormData] = useState({
     name: '',
     email: '',
@@ -28,7 +28,7 @@ function App() {
     subject: '',
     message: ''
   });
-  const [formErrors, setFormErrors] = useState({});
+
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [selectedConversation, setSelectedConversation] = useState(false);
@@ -149,20 +149,7 @@ function App() {
 
 
 
-  // Functie om sectienaam te vertalen
-  const getSectionName = (sectionId) => {
-    if (!sectionId) return 'Home';
-    
-    const sectionNames = {
-      'home': 'Home',
-      'over-ons': 'Over ons',
-      'portfolio': 'Portfolio',
 
-      'diensten': 'Diensten',
-      'contact': 'Contact'
-    };
-    return sectionNames[sectionId] || 'Home';
-  };
 
   // Functie om pakket te selecteren en direct naar contact te gaan
   const selectPackage = (packageInfo) => {
@@ -698,8 +685,7 @@ function App() {
               Diensten
             </a>
 
-            <a 
-              href="#" 
+            <button 
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -710,7 +696,10 @@ function App() {
                 fontSize: '16px',
                 fontWeight: '400',
                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer'
               }}
               onMouseEnter={(e) => {
                 e.target.style.color = '#0066cc';
@@ -721,7 +710,6 @@ function App() {
               onClick={(e) => {
                 e.preventDefault();
                 setIsMenuOpen(false);
-                setIsContactButtonExpanded(true);
               }}
             >
               <div style={{
@@ -737,7 +725,7 @@ function App() {
                 </svg>
               </div>
               Contact
-            </a>
+            </button>
           </div>
         </div>
       )}
@@ -2635,11 +2623,10 @@ function App() {
           <p style={{
             fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
             color: '#666666',
-            margin: '0',
+            margin: '0 auto',
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             lineHeight: '1.5',
-            maxWidth: '600px',
-            margin: '0 auto'
+            maxWidth: '600px'
           }}>
             Laat ons weten wat jij wil! Wij nemen zo snel mogelijk contact met je op.
           </p>
@@ -3557,13 +3544,16 @@ function App() {
               gap: '30px',
               flexWrap: 'wrap'
         }}>
-          <a href="#" style={{
+          <button style={{
             color: '#666',
             textDecoration: 'none',
             fontSize: '14px',
             fontWeight: '400',
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            transition: 'color 0.2s ease'
+            transition: 'color 0.2s ease',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer'
               }}
               onMouseEnter={(e) => {
                 e.target.style.color = '#0066cc';
@@ -3572,14 +3562,17 @@ function App() {
                 e.target.style.color = '#666';
           }}>
             Privacy
-          </a>
-          <a href="#" style={{
+          </button>
+          <button style={{
             color: '#666',
             textDecoration: 'none',
             fontSize: '14px',
             fontWeight: '400',
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            transition: 'color 0.2s ease'
+            transition: 'color 0.2s ease',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer'
               }}
               onMouseEnter={(e) => {
                 e.target.style.color = '#0066cc';
@@ -3588,14 +3581,17 @@ function App() {
                 e.target.style.color = '#666';
           }}>
             Voorwaarden
-          </a>
-          <a href="#" style={{
+          </button>
+          <button style={{
             color: '#666',
             textDecoration: 'none',
             fontSize: '14px',
             fontWeight: '400',
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            transition: 'color 0.2s ease'
+            transition: 'color 0.2s ease',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer'
               }}
               onMouseEnter={(e) => {
                 e.target.style.color = '#0066cc';
@@ -3604,7 +3600,7 @@ function App() {
                 e.target.style.color = '#666';
               }}>
                 Cookies
-              </a>
+              </button>
             </div>
           </div>
         </div>
