@@ -20,6 +20,6 @@
     }
   ],
   "env": {
-    "TRANSIP_EMAIL_PASSWORD": "@transip-email-password"
+    "TRANSIP_EMAIL_PASSWORD": "transip-email-password"
   }
 }
