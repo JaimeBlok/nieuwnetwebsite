@@ -1006,7 +1006,7 @@ function App() {
       <div style={{
         width: '100%',
         maxWidth: 'none',
-        marginTop: '120px',
+        marginTop: '60px',
         position: 'relative',
         zIndex: '10',
         padding: '80px 0',
@@ -1577,7 +1577,7 @@ function App() {
       <div id="over-ons" style={{
         width: '100%',
         maxWidth: 'none',
-        marginTop: '120px',
+        marginTop: '60px',
         position: 'relative',
         zIndex: '10',
         padding: '80px 0',
@@ -1610,15 +1610,74 @@ function App() {
             OVER ONS
           </span>
         </div>
+        
+        {/* Grote titel boven over ons content */}
+        <div style={{
+          maxWidth: '1200px',
+          margin: '60px auto 0 auto',
+          padding: '0 clamp(20px, 4vw, 40px)',
+          textAlign: 'left'
+        }}>
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+            fontWeight: '700',
+            color: '#333333',
+            margin: '0 0 20px 0',
+            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            lineHeight: '1.1',
+            letterSpacing: '-0.02em',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'keep-all',
+            overflowWrap: 'anywhere',
+            hyphens: 'none',
+            WebkitHyphens: 'none',
+            msHyphens: 'none',
+            height: 'auto',
+            minHeight: 'auto'
+          }}>
+            Over Ons.<br />
+            En Onze <span style={{ color: '#0066cc' }}>Visie.</span>
+          </h1>
+          <p style={{
+            fontSize: 'clamp(1.1rem, 2.5vw, 1.3rem)',
+            color: '#666666',
+            margin: '0',
+            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            lineHeight: '1.6',
+            maxWidth: '600px'
+          }}>
+            Ontdek wie we zijn en waar we voor staan in de digitale wereld.
+          </p>
+        </div>
         </div>
 
-
+        {/* OverDelft afbeelding */}
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 clamp(20px, 4vw, 40px)',
+          display: 'flex',
+          justifyContent: 'center'
+        }}>
+          <img 
+            src="/OverDelft.png" 
+            alt="Over Delft" 
+            style={{
+              width: '100%',
+              height: 'auto',
+              borderRadius: '24px',
+              objectFit: 'cover',
+              objectPosition: 'center 10%',
+              maxHeight: '400px'
+            }}
+          />
+        </div>
 
       {/* Diensten sectie */}
       <div style={{
         width: '100%',
         maxWidth: 'none',
-        marginTop: '120px',
+        marginTop: '60px',
         position: 'relative',
         zIndex: 10,
         padding: '80px 0',
@@ -2322,7 +2381,7 @@ function App() {
       <div style={{
         width: '100%',
         maxWidth: 'none',
-        marginTop: '120px',
+        marginTop: '60px',
         position: 'relative',
         zIndex: '10',
         backgroundColor: 'white',
