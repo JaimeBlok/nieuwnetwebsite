@@ -1134,8 +1134,7 @@ function App() {
             justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
             zIndex: 2
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1216,8 +1215,7 @@ function App() {
             justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
             zIndex: 2
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1298,8 +1296,7 @@ function App() {
             justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
             zIndex: 2
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1380,8 +1377,7 @@ function App() {
             justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
             zIndex: 2
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1462,8 +1458,7 @@ function App() {
             justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
             zIndex: 2
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1544,8 +1539,7 @@ function App() {
             justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
             zIndex: 2
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1777,8 +1771,7 @@ function App() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
             border: '1px solid #e2e8f0',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column'
@@ -1952,8 +1945,7 @@ function App() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
             border: '1px solid #0066cc',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column'
@@ -2113,8 +2105,7 @@ function App() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
             border: '1px solid #e2e8f0',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column',
@@ -2872,8 +2863,7 @@ function App() {
                     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                     cursor: 'pointer',
                     transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+                    transform: 'translateY(0) scale(1)',
                     boxShadow: '0 4px 12px rgba(0, 102, 204, 0.3)',
                     width: '100%',
                     display: 'flex',
