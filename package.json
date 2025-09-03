@@ -38,5 +38,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "node-fetch": "^3.3.2",
+    "vercel": "^46.1.1"
   }
 }

@@ -18,6 +18,8 @@ html, body {
   /* Behoud native scroll gedrag */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  /* Zorg ervoor dat fixed positioning werkt */
+  position: relative;
 }
 
 /* Specifieke styling voor iPhone en Safari */
@@ -79,17 +81,38 @@ html, body {
   opacity: 1 !important;
 }
 
-/* Verberg scrollbalken voor alle browsers */
-.nature-grid::-webkit-scrollbar {
-  display: none;
-}
-
+/* Portfolio grid layout */
 .nature-grid {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 16px !important;
   /* Optimaliseer scroll voor portfolio sectie */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
+}
+
+/* Op tablets: 3 kolommen (2 rijen van 3) */
+@media (max-width: 1400px) {
+  .nature-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px !important;
+  }
+}
+
+/* Op kleinere schermen: 2 kolommen (3 rijen van 2) */
+@media (max-width: 768px) {
+  .nature-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+
+/* Op zeer kleine schermen: 1 kolom */
+@media (max-width: 480px) {
+  .nature-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
 }
 
 @keyframes fadeIn {
@@ -231,7 +254,34 @@ html, body {
 /* Smooth scroll behavior voor de hele pagina */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 100px;
 }
+
+/* Langzamere scroll animatie */
+* {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+/* Langzamere scroll door CSS */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+/* Vertraag scroll animatie */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Verbeterde smooth scroll met parallax ondersteuning */
+* {
+  scroll-behavior: smooth;
+}
+
+
 
 /* Hover effecten voor de knop */
 .floating-button:hover {
@@ -287,15 +337,11 @@ body.form-open {
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  z-index: 1000 !important;
-  
-  /* Voeg backdrop filter toe voor betere leesbaarheid */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  z-index: 9999 !important;
   
   /* Zorg ervoor dat de header niet te breed wordt op kleine schermen */
   max-width: 100vw;
-  overflow: hidden;
+  overflow: visible;
   
   /* Uniforme styling voor alle schermformaten */
   padding: 0 clamp(10px, 2vw, 40px) !important;
@@ -305,6 +351,38 @@ body.form-open {
   align-items: center !important;
   background-color: #ffffff !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  
+  /* Zorg ervoor dat de header echt fixed blijft */
+  transform: none !important;
+  will-change: auto !important;
+}
+
+/* Extra specifieke regel om te zorgen dat header echt fixed blijft */
+header.header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+}
+
+/* Nog specifiekere regel voor alle mogelijke conflicten */
+.App header.header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+}
+
+/* ULTRA specifieke regel om ALLE conflicten uit te sluiten */
+div.App > header.header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+  transform: none !important;
 }
 
 /* Logo styling - uniform op alle apparaten */
@@ -351,25 +429,44 @@ body.form-open {
   height: clamp(2px, 0.4vw, 2px) !important;
   background-color: #333333 !important;
   border-radius: 1px !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform-origin: center !important;
+}
+
+/* Hamburger naar kruis animatie */
+.hamburger-menu-button.open > div:nth-child(1) {
+  transform: translateY(clamp(6px, 1.2vw, 8px)) rotate(45deg) !important;
+}
+
+.hamburger-menu-button.open > div:nth-child(2) {
+  opacity: 0 !important;
+  transform: scaleX(0) !important;
+}
+
+.hamburger-menu-button.open > div:nth-child(3) {
+  transform: translateY(clamp(-6px, -1.2vw, -8px)) rotate(-45deg) !important;
 }
 
 /* Verbeterde hamburger menu styling */
 .hamburger-menu-overlay {
   /* Zorg ervoor dat het menu goed gepositioneerd is op mobiel */
-  position: fixed !important;
-  top: clamp(20px, 4vw, 30px) !important;
-  right: clamp(20px, 4vw, 30px) !important;
-  left: clamp(20px, 4vw, 30px) !important;
-  width: auto !important;
-  max-width: 320px !important;
-  margin-left: auto !important;
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
   
   /* Verbeterde animatie */
   animation: slideIn 0.3s ease-out !important;
   
   /* Zorg ervoor dat het menu boven het logo komt */
   z-index: 10001 !important;
+  
+  /* Naadloze aansluiting op header */
+  border-top: none !important;
+  border-radius: 0 0 20px 20px !important;
 }
 
 /* Verbeterde slideIn animatie */
@@ -398,8 +495,8 @@ body.form-open {
 /* Verwijder oude media queries die conflicteren */
 /* Alle header styling wordt nu uniform beheerd door de hoofdregels hierboven */
 
-/* Wanneer hamburger menu open is, verberg andere onderdelen inclusief header */
-body.menu-open .App > *:not(.hamburger-menu-overlay) {
+/* Wanneer hamburger menu open is, verberg andere onderdelen maar niet de header */
+body.menu-open .App > *:not(.hamburger-menu-overlay):not(header) {
   opacity: 0.3;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -450,12 +547,13 @@ body.menu-open .App > *:not(.hamburger-menu-overlay) {
   
   /* Hamburger menu responsive */
   .hamburger-menu-overlay {
-    width: calc(100% - 40px) !important;
+    width: 100% !important;
     height: auto !important;
     min-height: 160px;
-    right: 20px !important;
-    left: 20px !important;
-    border-radius: 20px !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: 0 !important;
+    border-radius: 0 0 20px 20px !important;
     max-width: none !important;
   }
   
@@ -507,9 +605,10 @@ body.menu-open .App > *:not(.hamburger-menu-overlay) {
 @media (max-width: 480px) {
   .hamburger-menu-overlay {
     padding: 30px 20px !important;
-    width: calc(100% - 30px) !important;
-    right: 15px !important;
-    left: 15px !important;
+    width: 100% !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: 0 !important;
   }
   
   /* Spacing wordt nu beheerd door de nieuwe uniforme styling */
@@ -567,8 +666,8 @@ textarea.error::placeholder {
   gap: 40px;
 }
 
-/* Op mobiel: direct contact onder het formulier */
-@media (max-width: 768px) {
+/* Op kleinere schermen: direct contact onder het formulier */
+@media (max-width: 1200px) {
   .contact-grid {
     grid-template-columns: 1fr;
     grid-template-areas: 
@@ -576,14 +675,16 @@ textarea.error::placeholder {
       "contact";
   }
   
+  /* Eerste div (formulier) komt eerst */
   .contact-grid > div:first-child {
-    grid-area: contact;
-    order: 2;
-  }
-  
-  .contact-grid > div:last-child {
     grid-area: form;
     order: 1;
+  }
+  
+  /* Tweede div (direct contact) komt onder */
+  .contact-grid > div:last-child {
+    grid-area: contact;
+    order: 2;
   }
 }
 
@@ -591,9 +692,10 @@ textarea.error::placeholder {
 
 @media (max-width: 480px) {
   .hamburger-menu-overlay {
-    width: calc(100% - 30px) !important;
-    right: 15px !important;
-    left: 15px !important;
+    width: 100% !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: 0 !important;
     max-width: none !important;
   }
   
@@ -746,11 +848,6 @@ textarea.error::placeholder {
   transform: translateY(-1px);
 }
 
-/* Smooth scroll behavior voor de hele pagina */
-html {
-  scroll-behavior: smooth;
-}
-
 /* Verbeterde focus states voor toegankelijkheid */
 .desktop-menu a:focus {
   outline: 2px solid #0066cc;
@@ -853,4 +950,72 @@ html {
     overscroll-behavior-x: contain;
     touch-action: pan-x pan-y;
   }
+}
+
+/* Hover effect voor de "nog vragen plan een gesprek" knop */
+.conversation-button {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.conversation-button .button-fill {
+  position: absolute !important;
+  top: -3px !important;
+  left: -3px !important;
+  width: calc(100% + 6px) !important;
+  height: calc(100% + 6px) !important;
+  background-color: #0066cc !important;
+  transform: translateX(-100%) !important;
+  transition: transform 0.4s ease !important;
+  z-index: -1 !important;
+  border-radius: 53px !important;
+}
+
+.conversation-button:hover {
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 25px rgba(0, 102, 204, 0.3) !important;
+  border-color: transparent !important;
+}
+
+.conversation-button:hover .button-fill {
+  transform: translateX(0) !important;
+}
+
+/* Zorg ervoor dat de tekst altijd boven de fill blijft */
+.conversation-button span,
+.conversation-button div {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Hover effecten voor direct contact onderdelen - alleen tekst blauw */
+.direct-contact-item:hover .contact-text div {
+  color: #0066cc !important;
+}
+
+/* Fix voor header navigatie elementen die blauw blijven */
+.desktop-menu a {
+  color: #333333 !important;
+}
+
+.desktop-menu a:hover {
+  color: #0066cc !important;
+}
+
+.desktop-menu a:not(:hover) {
+  color: #333333 !important;
+}
+
+/* Fix voor hamburger menu items die blauw blijven */
+.hamburger-menu-overlay a {
+  color: #2a2a2a !important;
+}
+
+.hamburger-menu-overlay a:hover {
+  color: #0066cc !important;
+}
+
+.hamburger-menu-overlay a:not(:hover) {
+  color: #2a2a2a !important;
 }
