@@ -5,10 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 // Import alle afbeeldingen
 import logoImage from './images/NNLOGO.png';
 import carriereStudentImage from './images/CarrièreStudent.png';
-import cscImage from './images/CSC.png';
 import nature4Image from './images/Nature4.jpg';
-import iconImage from './images/ICOON.png';
-import logoPortfolioImage from './images/LOGO.png';
 
 import jaimeImage from './images/Jaime.jpg';
 import florisImage from './images/Floris.jpeg';
