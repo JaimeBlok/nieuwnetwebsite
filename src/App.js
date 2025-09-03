@@ -465,9 +465,8 @@ function App() {
             backgroundColor: '#333333',
             borderRadius: '1px',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
-            transform: 'none'
+            transform: 'none',
+            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)'
           }}></div>
           <div style={{
             width: 'clamp(20px, 4vw, 24px)',
@@ -475,8 +474,8 @@ function App() {
             backgroundColor: '#333333',
             borderRadius: '1px',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(0) scale(1)',
+            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
             opacity: 1
           }}></div>
           <div style={{
@@ -485,9 +484,8 @@ function App() {
             backgroundColor: '#333333',
             borderRadius: '1px',
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
-            transform: 'none'
+            transform: 'none',
+            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)'
           }}></div>
         </button>
 
@@ -886,8 +884,7 @@ function App() {
                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                 cursor: 'pointer',
                 transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+                transform: 'translateY(0) scale(1)',
                 boxShadow: '0 4px 12px rgba(0, 102, 204, 0.3)'
               }}
               onMouseEnter={(e) => {
