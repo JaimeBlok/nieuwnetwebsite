@@ -1660,7 +1660,7 @@ function App() {
           justifyContent: 'center'
         }}>
           <img 
-            src="/OverDelft.png" 
+            src="/Delft-min.jpg" 
             alt="Over Delft" 
             style={{
               width: '100%',
