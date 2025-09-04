@@ -20,6 +20,36 @@ function App() {
 
 
   const [currentSection, setCurrentSection] = useState('over-ons');
+  const [selectedQuality, setSelectedQuality] = useState(null);
+
+  // Kwaliteiten data
+  const qualities = [
+    {
+      id: 1,
+      title: "Gratis hosting en domein",
+      description: "Voor het eerste jaar krijg je volledig gratis hosting en een .nl domein. Dit bespaart je honderden euro's aan jaarlijkse kosten en geeft je direct een professionele online aanwezigheid."
+    },
+    {
+      id: 2,
+      title: "Kosteloze aanpassingen",
+      description: "Tekst en afbeeldingen kunnen kosteloos worden aangepast. Wij begrijpen dat je website moet meegroeien met je bedrijf, daarom helpen we je graag bij het up-to-date houden van je content."
+    },
+    {
+      id: 3,
+      title: "SSL en beveiliging",
+      description: "Gratis SSL certificaat en uitgebreide beveiligingsmaatregelen zorgen ervoor dat je website en bezoekers volledig beschermd zijn. Dit is essentieel voor vertrouwen en SEO."
+    },
+    {
+      id: 4,
+      title: "Onderhoud en updates",
+      description: "De eerste 6 maanden krijg je gratis onderhoud en updates. We zorgen ervoor dat je website altijd up-to-date blijft en optimaal presteert."
+    },
+    {
+      id: 5,
+      title: "Google Analytics",
+      description: "Gratis SEO optimalisatie en Google Analytics setup. We helpen je gevonden worden in Google en geven je inzicht in je website prestaties."
+    }
+  ];
 
   const [contactFormData, setContactFormData] = useState({
     name: '',
@@ -36,6 +66,7 @@ function App() {
   const [includeBTW, setIncludeBTW] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [shouldSpanTwoColumns, setShouldSpanTwoColumns] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
 
 
@@ -1006,10 +1037,10 @@ function App() {
       <div style={{
         width: '100%',
         maxWidth: 'none',
-        marginTop: '60px',
+        marginTop: '40px',
         position: 'relative',
         zIndex: '10',
-        padding: '80px 0',
+        padding: '50px 0',
         backgroundColor: '#ffffff'
       }}>
         {/* Portfolio anker */}
@@ -1045,10 +1076,10 @@ function App() {
         <div style={{
           width: '100%',
           textAlign: 'center',
-          margin: '60px 0 80px 0'
+          margin: '40px 0 50px 0'
         }}>
           <h1 style={{
-            fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+            fontSize: windowWidth <= 768 ? '48px' : '64px',
             fontWeight: '700',
             color: '#333333',
             margin: '0',
@@ -1064,523 +1095,340 @@ function App() {
             height: 'auto',
             minHeight: 'auto'
           }}>
-            Ons werk<br />
-            <span style={{ color: '#0066cc' }}>spreekt</span> voor zichzelf.
+            Onze kracht zit in<br />
+            <span style={{ color: '#0066cc' }}>Samenwerken.</span>
           </h1>
         </div>
         
-        <div className="nature-grid" style={{
+        {/* Drie licht grijze blokken */}
+        <div style={{
+          width: '100%',
+          maxWidth: '1200px',
+          margin: '40px auto 0 auto',
+          padding: '0 clamp(20px, 4vw, 40px)',
           display: 'grid',
-          gridTemplateColumns: windowWidth <= 1400 ? 'repeat(3, 1fr)' : 'repeat(6, 1fr)',
-          gap: '16px',
-          padding: '0 clamp(40px, 8vw, 80px)',
-          marginTop: '0',
-          maxWidth: 'none',
-          width: '100%',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative',
-          zIndex: 10
+          gridTemplateColumns: windowWidth <= 1024 ? '1fr' : 'repeat(3, 1fr)',
+          gap: '24px'
         }}>
-        
-        <div className="nature-card" style={{
-          width: '100%',
-          height: 'clamp(300px, 70vw, 350px)',
-          borderRadius: '20px',
-          overflow: 'hidden',
-          backgroundImage: `url(${nature4Image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          position: 'relative',
-          cursor: 'pointer',
-          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
-          flexShrink: 0
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.2)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = '#0066cc';
-            arrowButton.style.transform = 'scale(1.1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#ffffff';
-          }
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = 'white';
-            arrowButton.style.transform = 'scale(1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#333333';
-          }
-        }}>
-          {/* Arrow button buiten de gradient */}
-          <div className="arrow-button" style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            transform: 'translateY(0) scale(1)',
-            zIndex: 2
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(transparent, rgba(0, 51, 102, 0.9))',
-            padding: '30px 20px 20px 20px',
-            opacity: 1,
-            transition: 'opacity 0.3s ease'
-          }}>
-            <h3 style={{
-              color: 'white',
-              fontSize: '20px',
-              fontWeight: '600',
-              margin: '0 0 10px 0',
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          {/* Blok 1 */}
+          <a 
+            href="https://www.nieuw-net.nl" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: 'none',
+              color: 'inherit'
+            }}
+          >
+            <div style={{
+              backgroundColor: '#f8f9fa',
+              borderRadius: '20px',
+              border: '0.2px solid #e0e0e0',
+              padding: '40px 24px',
+              textAlign: 'center',
+              minHeight: '280px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              transform: 'translateY(0)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f0f2f5';
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8f9fa';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '16px',
+              marginBottom: '20px',
+              width: '100%',
+              paddingLeft: '8px',
+              justifyContent: 'flex-start'
             }}>
-              Web Development
-            </h3>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                background: 'linear-gradient(135deg, #0066cc 0%, #004499 100%)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <img 
+                  src="/ICOON.png" 
+                  alt="Bedrijf logo 1" 
+                  style={{
+                    width: '52px',
+                    height: '52px',
+                    filter: 'brightness(0) invert(1)',
+                    objectFit: 'contain'
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1, textAlign: 'left' }}>
+                <h3 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#333',
+                  margin: '0 0 4px 0',
+                  fontFamily: '"Inter", sans-serif'
+                }}>
+                  Circular Shipping Company
+                </h3>
+                <p style={{
+                  fontSize: '12px',
+                  color: '#999',
+                  margin: '0',
+                  fontFamily: '"Inter", sans-serif',
+                  lineHeight: '1.4'
+                }}>
+                  Duurzame logistieke oplossingen voor<br />
+                  een circulaire economie
+                </p>
+              </div>
+            </div>
+            <img 
+              src="/WebsiteMock.png" 
+              alt="Website Mockup 1" 
+              style={{
+                width: '100%',
+                maxWidth: '300px',
+                height: 'auto',
+                borderRadius: '8px',
+                objectFit: 'cover'
+              }}
+            />
           </div>
-        </div>
-        
-        <div className="nature-card" style={{
-          width: '100%',
-          height: 'clamp(300px, 70vw, 350px)',
-          borderRadius: '20px',
-          overflow: 'hidden',
-          backgroundImage: `url(${nature4Image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          position: 'relative',
-          cursor: 'pointer',
-          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
-          flexShrink: 0
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.2)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = '#0066cc';
-            arrowButton.style.transform = 'scale(1.1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#ffffff';
-          }
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = 'white';
-            arrowButton.style.transform = 'scale(1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#333333';
-          }
-        }}>
-          {/* Arrow button buiten de gradient */}
-          <div className="arrow-button" style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            transform: 'translateY(0) scale(1)',
-            zIndex: 2
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(transparent, rgba(0, 51, 102, 0.9))',
-            padding: '30px 20px 20px 20px',
-            opacity: 1,
-            transition: 'opacity 0.3s ease'
-          }}>
-            <h3 style={{
-              color: 'white',
-              fontSize: '20px',
-              fontWeight: '600',
-              margin: '0 0 10px 0',
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          </a>
+
+          {/* Blok 2 */}
+          <a 
+            href="https://www.nieuw-net.nl" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: 'none',
+              color: 'inherit'
+            }}
+          >
+            <div style={{
+              backgroundColor: '#f8f9fa',
+              borderRadius: '20px',
+              border: '0.2px solid #e0e0e0',
+              padding: '40px 24px',
+              textAlign: 'center',
+              minHeight: '280px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              transform: 'translateY(0)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f0f2f5';
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8f9fa';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '16px',
+              marginBottom: '20px',
+              width: '100%',
+              paddingLeft: '8px',
+              justifyContent: 'flex-start'
             }}>
-              Web Development
-            </h3>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                background: 'linear-gradient(135deg, #0066cc 0%, #004499 100%)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <img 
+                  src="/ICOON.png" 
+                  alt="Bedrijf logo 2" 
+                  style={{
+                    width: '52px',
+                    height: '52px',
+                    filter: 'brightness(0) invert(1)',
+                    objectFit: 'contain'
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1, textAlign: 'left' }}>
+                <h3 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#333',
+                  margin: '0 0 4px 0',
+                  fontFamily: '"Inter", sans-serif'
+                }}>
+                  Carriere Student
+                </h3>
+                <p style={{
+                  fontSize: '12px',
+                  color: '#999',
+                  margin: '0',
+                  fontFamily: '"Inter", sans-serif',
+                  lineHeight: '1.4'
+                }}>
+                  Platform voor studenten om hun<br />
+                  carrière te starten en te ontwikkelen
+                </p>
+              </div>
+            </div>
+            <img 
+              src="/WebsiteMock.png" 
+              alt="Website Mockup 2" 
+              style={{
+                width: '100%',
+                maxWidth: '300px',
+                height: 'auto',
+                borderRadius: '8px',
+                objectFit: 'cover'
+              }}
+            />
           </div>
-        </div>
-        
-        <div className="nature-card" style={{
-          width: '100%',
-          height: 'clamp(300px, 70vw, 350px)',
-          borderRadius: '20px',
-          overflow: 'hidden',
-          backgroundImage: `url(${nature4Image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          position: 'relative',
-          cursor: 'pointer',
-          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
-          flexShrink: 0
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.2)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = '#0066cc';
-            arrowButton.style.transform = 'scale(1.1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#ffffff';
-          }
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = 'white';
-            arrowButton.style.transform = 'scale(1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#333333';
-          }
-        }}>
-          {/* Arrow button buiten de gradient */}
-          <div className="arrow-button" style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            transform: 'translateY(0) scale(1)',
-            zIndex: 2
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(transparent, rgba(0, 51, 102, 0.9))',
-            padding: '30px 20px 20px 20px',
-            opacity: 1,
-            transition: 'opacity 0.3s ease'
-          }}>
-            <h3 style={{
-              color: 'white',
-              fontSize: '20px',
-              fontWeight: '600',
-              margin: '0 0 10px 0',
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          </a>
+
+          {/* Blok 3 */}
+          <a 
+            href="https://www.nieuw-net.nl" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: 'none',
+              color: 'inherit'
+            }}
+          >
+            <div style={{
+              backgroundColor: '#f8f9fa',
+              borderRadius: '20px',
+              border: '0.2px solid #e0e0e0',
+              padding: '40px 24px',
+              textAlign: 'center',
+              minHeight: '280px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              transform: 'translateY(0)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f0f2f5';
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8f9fa';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '16px',
+              marginBottom: '20px',
+              width: '100%',
+              paddingLeft: '8px',
+              justifyContent: 'flex-start'
             }}>
-              Web Development
-            </h3>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                background: 'linear-gradient(135deg, #0066cc 0%, #004499 100%)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <img 
+                  src="/ICOON.png" 
+                  alt="Bedrijf logo 3" 
+                  style={{
+                    width: '52px',
+                    height: '52px',
+                    filter: 'brightness(0) invert(1)',
+                    objectFit: 'contain'
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1, textAlign: 'left' }}>
+                <h3 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#333',
+                  margin: '0 0 4px 0',
+                  fontFamily: '"Inter", sans-serif'
+                }}>
+                  Koster Sportschool
+                </h3>
+                <p style={{
+                  fontSize: '12px',
+                  color: '#999',
+                  margin: '0',
+                  fontFamily: '"Inter", sans-serif',
+                  lineHeight: '1.4'
+                }}>
+                  Moderne sportschool met persoonlijke<br />
+                  begeleiding en flexibele tijden
+                </p>
+              </div>
+            </div>
+            <img 
+              src="/WebsiteMock.png" 
+              alt="Website Mockup 3" 
+              style={{
+                width: '100%',
+                maxWidth: '300px',
+                height: 'auto',
+                borderRadius: '8px',
+                objectFit: 'cover'
+              }}
+            />
           </div>
+          </a>
         </div>
-        
-        <div className="nature-card" style={{
-          width: '100%',
-          height: 'clamp(300px, 70vw, 350px)',
-          borderRadius: '20px',
-          overflow: 'hidden',
-          backgroundImage: `url(${nature4Image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          position: 'relative',
-          cursor: 'pointer',
-          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
-          flexShrink: 0
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.2)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = '#0066cc';
-            arrowButton.style.transform = 'scale(1.1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#ffffff';
-          }
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = 'white';
-            arrowButton.style.transform = 'scale(1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#333333';
-          }
-        }}>
-          {/* Arrow button buiten de gradient */}
-          <div className="arrow-button" style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            transform: 'translateY(0) scale(1)',
-            zIndex: 2
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(transparent, rgba(0, 51, 102, 0.9))',
-            padding: '30px 20px 20px 20px',
-            opacity: 1,
-            transition: 'opacity 0.3s ease'
-          }}>
-            <h3 style={{
-              color: 'white',
-              fontSize: '20px',
-              fontWeight: '600',
-              margin: '0 0 10px 0',
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              Web Development
-            </h3>
-          </div>
-        </div>
-        
-        <div className="nature-card" style={{
-          width: '100%',
-          height: 'clamp(300px, 70vw, 350px)',
-          borderRadius: '20px',
-          overflow: 'hidden',
-          backgroundImage: `url(${nature4Image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          position: 'relative',
-          cursor: 'pointer',
-          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
-          flexShrink: 0
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.2)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = '#0066cc';
-            arrowButton.style.transform = 'scale(1.1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#ffffff';
-          }
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = 'white';
-            arrowButton.style.transform = 'scale(1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#333333';
-          }
-        }}>
-          {/* Arrow button buiten de gradient */}
-          <div className="arrow-button" style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            transform: 'translateY(0) scale(1)',
-            zIndex: 2
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(transparent, rgba(0, 51, 102, 0.9))',
-            padding: '30px 20px 20px 20px',
-            opacity: 1,
-            transition: 'opacity 0.3s ease'
-          }}>
-            <h3 style={{
-              color: 'white',
-              fontSize: '20px',
-              fontWeight: '600',
-              margin: '0 0 10px 0',
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              Web Development
-            </h3>
-          </div>
-        </div>
-        
-        <div className="nature-card" style={{
-          width: '100%',
-          height: 'clamp(300px, 70vw, 350px)',
-          borderRadius: '20px',
-          overflow: 'hidden',
-          backgroundImage: `url(${nature4Image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          position: 'relative',
-          cursor: 'pointer',
-          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transform: 'translateY(0) scale(1)',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
-          flexShrink: 0
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-          e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.2)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = '#0066cc';
-            arrowButton.style.transform = 'scale(1.1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#ffffff';
-          }
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
-          const arrowButton = e.currentTarget.querySelector('.arrow-button');
-          if (arrowButton) {
-            arrowButton.style.backgroundColor = 'white';
-            arrowButton.style.transform = 'scale(1)';
-            const arrowPath = arrowButton.querySelector('path');
-            if (arrowPath) arrowPath.style.stroke = '#333333';
-          }
-        }}>
-          {/* Arrow button buiten de gradient */}
-          <div className="arrow-button" style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            transform: 'translateY(0) scale(1)',
-            zIndex: 2
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'linear-gradient(transparent, rgba(0, 51, 102, 0.9))',
-            padding: '30px 20px 20px 20px',
-            opacity: 1,
-            transition: 'opacity 0.3s ease'
-          }}>
-            <h3 style={{
-              color: 'white',
-              fontSize: '20px',
-              fontWeight: '600',
-              margin: '0 0 10px 0',
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              Web Development
-            </h3>
-          </div>
-        </div>
-        
-        
-          </div>
-        </div>
-        
+      </div>
+      
       {/* Over ons sectie - alleen header */}
       <div id="over-ons" style={{
         width: '100%',
         maxWidth: 'none',
-        marginTop: '60px',
+        marginTop: '40px',
         position: 'relative',
         zIndex: '10',
-        padding: '80px 0',
+        padding: '50px 0',
         minHeight: '200px'
       }}>
         {/* Over ons anker */}
@@ -1614,12 +1462,13 @@ function App() {
         {/* Grote titel boven over ons content */}
         <div style={{
           maxWidth: '1200px',
-          margin: '60px auto 0 auto',
+          margin: '40px auto 0 auto',
           padding: '0 clamp(20px, 4vw, 40px)',
-          textAlign: 'left'
+          textAlign: 'left',
+          position: 'relative'
         }}>
           <h1 style={{
-            fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+            fontSize: windowWidth <= 768 ? '48px' : '64px',
             fontWeight: '700',
             color: '#333333',
             margin: '0 0 20px 0',
@@ -1635,52 +1484,310 @@ function App() {
             height: 'auto',
             minHeight: 'auto'
           }}>
-            Over Ons.<br />
-            En Onze <span style={{ color: '#0066cc' }}>Visie.</span>
+            Het verhaal achter<br />
+            <span style={{ color: '#0066cc' }}>NieuwNet</span>
           </h1>
           <p style={{
             fontSize: 'clamp(1.1rem, 2.5vw, 1.3rem)',
             color: '#666666',
-            margin: '0',
+            margin: '0 0 10px 0',
             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             lineHeight: '1.6',
             maxWidth: '600px'
           }}>
-            Ontdek wie we zijn en waar we voor staan in de digitale wereld.
+            "NieuwNet is ontstaan op een zolderkamer in Delft, met het idee om lokale ondernemers te ondersteunen die online een extra zetje konden gebruiken. Delft vormt nog altijd het kloppende hart van NieuwNet. Samen met lokale ondernemers zijn we uitgegroeid tot wat we vandaag zijn."
           </p>
+          
+          {/* Jaime Ram profiel onder de subtekst */}
+          <a 
+            href="https://www.linkedin.com/in/jaime-ram-196373236/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              textDecoration: 'none',
+              display: 'inline-block'
+            }}
+          >
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '50px',
+              padding: '16px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '16px',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              marginTop: '10px',
+              marginBottom: '10px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+              e.target.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              e.target.style.transform = 'translateY(0px)';
+            }}>
+              <img 
+                src="/Jaime.jpg" 
+                alt="Jaime Ram" 
+                style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '50%',
+                  objectFit: 'cover'
+                }}
+              />
+              <div>
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#333333',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                  lineHeight: '1.2'
+                }}>
+                  Jaime Ram
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: '#666666',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                  lineHeight: '1.2',
+                  whiteSpace: 'nowrap'
+                }}>
+                  Oprichter en eigenaar van NieuwNet
+                </div>
+              </div>
+            </div>
+          </a>
         </div>
         </div>
 
         {/* OverDelft afbeelding */}
         <div style={{
           maxWidth: '1200px',
-          margin: '0 auto',
+          margin: '-50px auto 0 auto',
           padding: '0 clamp(20px, 4vw, 40px)',
           display: 'flex',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          position: 'relative'
         }}>
-          <img 
-            src="/Delft-min.jpg" 
-            alt="Over Delft" 
-            style={{
-              width: '100%',
-              height: 'auto',
-              borderRadius: '24px',
-              objectFit: 'cover',
-              objectPosition: 'center 10%',
-              maxHeight: '400px'
-            }}
-          />
+          <div style={{ position: 'relative', width: '100%' }}>
+            <img 
+              src="/Delft-min.jpg" 
+              alt="Over Delft" 
+              style={{
+                width: '100%',
+                height: 'auto',
+                borderRadius: '24px',
+                objectFit: 'cover',
+                objectPosition: 'center 10%',
+                maxHeight: '400px'
+              }}
+            />
+            {/* Witte tekst overlay in de hoek */}
+            <div style={{
+              position: 'absolute',
+              bottom: '20px',
+              right: '35px',
+              maxWidth: '200px'
+            }}>
+              <p style={{
+                margin: 0,
+                fontSize: '14px',
+                color: '#ffffff',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                lineHeight: '1.4',
+                fontWeight: '700',
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+                whiteSpace: 'nowrap'
+              }}>
+                De Nieuw Kerk, Delft
+              </p>
+            </div>
+          </div>
         </div>
+
+        {/* Twee doorzichtige blokken onder de Delft foto */}
+        <div style={{
+          maxWidth: '1200px',
+          margin: '40px auto 0 auto',
+          padding: '0 clamp(20px, 4vw, 40px)',
+          display: 'grid',
+          gridTemplateColumns: windowWidth <= 768 ? '1fr' : selectedQuality ? '1fr 1fr' : '1fr 1fr',
+          gridTemplateRows: windowWidth <= 768 ? 'auto auto' : 'auto',
+          gap: '30px',
+          alignItems: 'start',
+          transition: 'all 0.3s ease'
+        }}>
+          {/* Rechter blok - Tekst of dynamische content */}
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '16px',
+            padding: windowWidth <= 768 ? '24px' : '32px',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            textAlign: 'right',
+            order: windowWidth <= 768 ? 1 : 2,
+            transition: 'all 0.3s ease'
+          }}>
+            <div style={{ 
+              textAlign: 'right', 
+              width: '100%',
+              transition: 'all 0.4s ease-in-out'
+            }}>
+              <h2 
+                key={selectedQuality ? selectedQuality.id : 'default'}
+                style={{
+                  fontSize: windowWidth <= 768 ? '48px' : '64px',
+                  fontWeight: '700',
+                  color: '#333333',
+                  margin: selectedQuality ? '0 0 16px 0' : '0',
+                  lineHeight: '1.1',
+                  fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                  transition: 'all 0.4s ease-in-out',
+                  animation: 'fadeIn 0.4s ease-in-out'
+                }}>
+                {selectedQuality ? selectedQuality.title : (
+                  <>Kwaliteit is de basis voor <span style={{ color: '#0066cc' }}>Vertrouwen</span>.</>
+                )}
+              </h2>
+              {selectedQuality && (
+                <p 
+                  key={`desc-${selectedQuality.id}`}
+                  style={{
+                    fontSize: '16px',
+                    color: '#666666',
+                    margin: 0,
+                    lineHeight: '1.6',
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    transition: 'all 0.4s ease-in-out',
+                    animation: 'fadeIn 0.4s ease-in-out'
+                  }}>
+                  {selectedQuality.description}
+                </p>
+              )}
+            </div>
+          </div>
+          
+          {/* Linker blok - 5 knoppen */}
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: windowWidth <= 768 ? '24px' : '32px',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            order: windowWidth <= 768 ? 2 : 1
+          }}>
+            {/* 5 knoppen */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {qualities.map((quality) => (
+                <div 
+                  key={quality.id}
+                  style={{
+                    backgroundColor: selectedQuality?.id === quality.id ? 'rgba(0, 102, 204, 0.1)' : 'rgba(255, 255, 255, 0.8)',
+                    borderRadius: '12px',
+                    padding: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    border: selectedQuality?.id === quality.id ? '2px solid #0066cc' : '1px solid rgba(0, 0, 0, 0.05)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    transform: selectedQuality?.id === quality.id ? 'translateX(20px)' : 'translateX(0px)'
+                  }}
+                  onClick={() => {
+                    if (selectedQuality?.id === quality.id) {
+                      setSelectedQuality(null);
+                    } else {
+                      setSelectedQuality(quality);
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedQuality?.id !== quality.id) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedQuality?.id !== quality.id) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                      e.currentTarget.style.transform = 'translateY(0px)';
+                    }
+                  }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: selectedQuality?.id === quality.id ? '#0066cc' : '#1976d2',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{
+                      margin: 0,
+                      fontSize: '16px',
+                      color: '#333333',
+                      lineHeight: '1.1',
+                      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                      fontWeight: selectedQuality?.id === quality.id ? '600' : '400'
+                    }}>
+                      {quality.title}
+                    </p>
+                  </div>
+                  <button 
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      backgroundColor: selectedQuality?.id === quality.id ? '#0066cc' : '#f5f5f5',
+                      border: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedQuality(null);
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = selectedQuality?.id === quality.id ? '#0052a3' : '#e0e0e0';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = selectedQuality?.id === quality.id ? '#0066cc' : '#f5f5f5';
+                    }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill={selectedQuality?.id === quality.id ? "white" : "#666"}>
+                      <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Diensten sectie */}
       <div style={{
         width: '100%',
         maxWidth: 'none',
-        marginTop: '60px',
+        marginTop: '40px',
         position: 'relative',
         zIndex: 10,
-        padding: '80px 0',
+        padding: '50px 0',
         backgroundColor: '#ffffff'
       }}>
         {/* Diensten anker */}
@@ -1715,7 +1822,7 @@ function App() {
         {/* Diensten intro */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '60px',
+          marginBottom: '40px',
           padding: '0 clamp(20px, 4vw, 40px)'
         }}>
           <h3 style={{
@@ -1738,7 +1845,7 @@ function App() {
             lineHeight: '1.6',
             maxWidth: '600px'
           }}>
-            Eenvoudig layouts aanpassen, content bijwerken en je website personaliseren met onze intuïtieve oplossingen—geen programmeerkennis vereist.
+            Van startende ondernemer tot groot bedrijf!
           </p>
         </div>
 
@@ -1746,7 +1853,7 @@ function App() {
         <div style={{
           display: 'flex',
           justifyContent: 'center',
-          marginBottom: '60px'
+          marginBottom: '40px'
         }}>
           <div style={{
             position: 'relative',
@@ -1816,7 +1923,7 @@ function App() {
         {/* Pricing cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
           gap: '32px',
           maxWidth: '1200px',
           margin: '0 auto',
@@ -2361,6 +2468,16 @@ function App() {
               position: 'relative',
               overflow: 'hidden'
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#0066cc';
+              e.currentTarget.style.color = 'white';
+              e.currentTarget.style.border = '2px solid #0066cc';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'white';
+              e.currentTarget.style.color = '#0066cc';
+              e.currentTarget.style.border = '2px solid #0066cc';
+            }}
           >
             {/* Blue fill element for hover effect */}
             <div className="button-fill" />
@@ -2381,11 +2498,11 @@ function App() {
       <div style={{
         width: '100%',
         maxWidth: 'none',
-        marginTop: '60px',
+        marginTop: '40px',
         position: 'relative',
         zIndex: '10',
         backgroundColor: 'white',
-        padding: '80px 0',
+        padding: '50px 0',
         overflow: 'hidden'
       }}>
 
@@ -2414,7 +2531,7 @@ function App() {
         {/* Contact introductie */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '60px'
+          marginBottom: '40px'
         }}>
           {/* Contact anker */}
           <div id="contact" style={{ 
@@ -3171,7 +3288,7 @@ function App() {
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(15px)',
         borderTop: '1px solid rgba(0, 0, 0, 0.1)',
-        marginTop: '80px'
+        marginTop: '40px'
       }}>
         <div style={{
           maxWidth: '1200px',
@@ -3463,7 +3580,6 @@ function App() {
       {/* Vercel Speed Insights */}
       <SpeedInsights />
 
-      </div>
     </>
   );
 }
