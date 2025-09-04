@@ -5,7 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 // Import alle afbeeldingen
 import logoImage from './images/NNLOGO.png';
 import carriereStudentImage from './images/CarrièreStudent.png';
-import nature4Image from './images/Nature4.jpg';
+// import nature4Image from './images/Nature4.jpg';
 
 import jaimeImage from './images/Jaime.jpg';
 import florisImage from './images/Floris.jpeg';
@@ -66,7 +66,7 @@ function App() {
   const [includeBTW, setIncludeBTW] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [shouldSpanTwoColumns, setShouldSpanTwoColumns] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  // const [currentSlide, setCurrentSlide] = useState(0);
 
 
 
